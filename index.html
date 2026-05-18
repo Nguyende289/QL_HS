@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Quản lý Hồ sơ Offline (Bảo mật)</title>
+    <title>Hệ thống Quản lý Hồ sơ Giao diện Bảng</title>
     <style>
         :root {
             --primary-color: #1a365d;
@@ -57,27 +57,31 @@
         .add-flex input, .add-flex select { padding: 8px; border: 1px solid #ced4da; border-radius: 4px; width: 100%; box-sizing: border-box; }
         .btn-add { background-color: #17a2b8; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
 
-        /* Danh sách dữ liệu chính */
+        /* Danh sách dữ liệu chính dạng BẢNG CHIA CỘT */
         .table-container { background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto; }
-        table.data-table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        table.data-table th, table.data-table td { border: 1px solid #dee2e6; padding: 8px; font-size: 13px; }
-        table.data-table th { background-color: var(--secondary-color); color: white; text-align: center; }
+        table.data-table { width: 100%; border-collapse: collapse; min-width: 650px; }
+        table.data-table th, table.data-table td { border: 1px solid #dee2e6; padding: 10px; font-size: 13px; text-align: center; }
+        table.data-table th { background-color: var(--secondary-color); color: white; font-weight: bold; }
         table.data-table tr:nth-child(even) { background-color: #f8f9fa; }
         
-        td[contenteditable="true"] { background-color: #fffdf0; }
-        td[contenteditable="true"]:focus { background-color: #fff; border: 2px solid var(--success-color); outline: none; }
+        /* Cấu hình các ô cho phép sửa trực tiếp */
+        td[contenteditable="true"] { background-color: #fffdf0; text-align: left; padding-left: 8px; }
+        td[contenteditable="true"]:focus { background-color: #fff; border: 2px solid var(--success-color); outline: none; box-shadow: inset 0 1px 1px rgba(0,0,0,.075); }
+        
+        /* Cột Loại căn giữa để đẹp mắt */
+        td.col-loai { font-weight: bold; color: blue; text-align: center; }
 
+        .btn-action-container { display: flex; gap: 4px; justify-content: center; align-items: center; }
         .btn-menu { background-color: var(--success-color); color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
-        .btn-delete { background-color: var(--danger-color); color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 4px; }
+        .btn-delete { background-color: var(--danger-color); color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
         
         @media (min-width: 600px) {
             .add-flex { flex-direction: row; }
             .btn-add { width: auto; }
-            .btn-delete { margin-top: 0; margin-left: 5px; }
         }
 
         .dropdown-menu-list { display: none; position: absolute; background-color: #ffffff; min-width: 180px; box-shadow: 0px 8px 16px rgba(0,0,0,0.2); border-radius: 4px; z-index: 1000; border: 1px solid #ccc; padding: 5px 0; }
-        .dropdown-menu-list a { color: #333; padding: 8px 12px; text-decoration: none; display: block; font-size: 13px; }
+        .dropdown-menu-list a { color: #333; padding: 8px 12px; text-decoration: none; display: block; font-size: 13px; text-align: left; }
         .dropdown-menu-list a:hover { background-color: var(--secondary-color); color: white; }
     </style>
 </head>
@@ -178,14 +182,17 @@
             </div>
         </div>
 
-        <!-- DANH SÁCH HỒ SƠ QUẢN LÝ -->
+        <!-- DANH SÁCH HỒ SƠ QUẢN LÝ DẠNG BẢNG CHIA CỘT RÕ RÀNG -->
         <div class="table-container">
             <table class="data-table">
                 <thead>
                     <tr>
                         <th width="5%">STT</th>
-                        <th>Thông tin chi tiết hồ sơ (Họ tên / Loại / Bí danh / Số HS)</th>
-                        <th width="22%">Tác vụ</th>
+                        <th width="30%">Họ tên</th>
+                        <th width="15%">Loại</th>
+                        <th width="20%">Bí danh</th>
+                        <th width="15%">Số HS</th>
+                        <th width="15%">Tác vụ</th>
                     </tr>
                 </thead>
                 <tbody id="danh_sach_ho_so" oninput="updateDataStringOnly()"></tbody>
@@ -221,7 +228,6 @@
                 document.getElementById('pin-screen').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
                 
-                // Thử tải dữ liệu từ bộ nhớ cục bộ nếu có sẵn
                 let localSave = localStorage.getItem('local_backup_data');
                 if(localSave) {
                     document.getElementById('data_string_box').value = localSave;
@@ -234,7 +240,6 @@
             }
         }
 
-        // HÀM BIẾN DỮ LIỆU THÀNH CHUỖI MÃ HÓA TRÊN KHUNG NHẬP KHÔNG CẦN QUA MẠNG
         function updateDataStringOnly() {
             const currentList = collectCurrentData();
             localDataHoSo = currentList;
@@ -250,7 +255,6 @@
                 hs: currentList
             };
 
-            // Mã hóa dữ liệu dạng Base64 chống lỗi hiển thị ký tự đặc biệt
             const jsonString = JSON.stringify(dataPackage);
             const base64String = btoa(unescape(encodeURIComponent(jsonString)));
             
@@ -259,7 +263,6 @@
             showStatusMessage("🔄 Đã tạo mã lưu trữ mới");
         }
 
-        // HÀM ĐỌC CHUỖI DỮ LIỆU KHI DÁN VÀO WEB
         function importDataFromString() {
             const str = document.getElementById('data_string_box').value.trim();
             if(!str) return;
@@ -284,7 +287,6 @@
             }
         }
 
-        // HÀM COPY MÃ CHỈ BẰNG 1 CLICK TRÊN ĐIỆN THOẠI
         function copyDataString() {
             updateDataStringOnly();
             const copyText = document.getElementById("data_string_box");
@@ -302,22 +304,23 @@
             document.getElementById('copy_status').innerText = text;
         }
 
+        // HÀM ĐỔ DỮ LIỆU THEO TỪNG CỘT RIÊNG BIỆT
         function renderTable() {
             const tbody = document.getElementById('danh_sach_ho_so');
             tbody.innerHTML = "";
             localDataHoSo.forEach((item, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td align="center" valign="middle">${index + 1}</td>
+                    <td>${index + 1}</td>
+                    <td contenteditable="true" class="edit-hoten" style="font-weight:bold;">${item.ho_ten || ''}</td>
+                    <td contenteditable="true" class="edit-loai col-loai">${item.loai_cs || ''}</td>
+                    <td contenteditable="true" class="edit-bidanh" style="font-style:italic; text-align:left; padding-left:8px;">${item.bi_danh || ''}</td>
+                    <td contenteditable="true" class="edit-sohs">${item.so_ho_so || ''}</td>
                     <td>
-                        Họ Tên: <span contenteditable="true" class="edit-hoten" style="font-weight:bold;">${item.ho_ten || ''}</span><br>
-                        Loại: <span contenteditable="true" class="edit-loai" style="color:blue; font-weight:bold;">${item.loai_cs || ''}</span> | 
-                        Bí danh: <span contenteditable="true" class="edit-bidanh" style="font-style:italic;">${item.bi_danh || ''}</span><br>
-                        Số HS: <span contenteditable="true" class="edit-sohs">${item.so_ho_so || ''}</span>
-                    </td>
-                    <td align="center" valign="middle">
-                        <button class="btn-menu" onclick="showFormList(event, this, ${index})">MẪU ▾</button><br>
-                        <button class="btn-delete" onclick="deleteRow(${index})">Xóa</button>
+                        <div class="btn-action-container">
+                            <button class="btn-menu" onclick="showFormList(event, this, ${index})">MẪU</button>
+                            <button class="btn-delete" onclick="deleteRow(${index})">Xóa</button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -361,7 +364,7 @@
         }
 
         function deleteRow(index) {
-            if (confirm(`Xóa hồ sơ: ${localDataHoSo[index].ho_ten}?`)) {
+            if (confirm(`Xóa hồ sơ của: ${localDataHoSo[index].ho_ten}?`)) {
                 localDataHoSo.splice(index, 1);
                 renderTable();
                 updateDataStringOnly();
