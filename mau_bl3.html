@@ -1,181 +1,338 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en" id="bieumau">
 <head>
     <meta charset="UTF-8">
-    <title>Mẫu BL3 - Báo cáo Nhận xét</title>
+    <title>Mẫu BL3 - Báo cáo nhận xét định kỳ</title>
+    
+    <!-- Giữ nguyên các liên kết Style cục bộ của bạn -->
+    <link rel="stylesheet" href="C://BieuMauHSNV/Style/style.css">
+    <link rel="stylesheet" href="C://BieuMauHSNV/Style/print.css">
+    
     <style>
-        body { font-family: "Times New Roman", Times, serif; margin: 40px auto; width: 750px; line-height: 1.6; font-size: 14pt; background-color: #fff; color: #000; }
+        /* Bổ sung CSS dự phòng để hiển thị mượt mà trên trình duyệt điện thoại/GitHub khi thiếu file Style cục bộ */
+        body { font-family: "Times New Roman", Times, serif; margin: 30px auto; width: 750px; line-height: 1.5; font-size: 14pt; background-color: #fff; color: #000; position: relative; }
+        .wrapper { padding: 10px; }
+        .f_left { float: left; }
+        .f_right { float: right; }
+        .ta_center { text-align: center; }
+        .ta_justify { text-align: justify; }
+        .fontBold { font-weight: bold; }
+        .fontUpper { text-transform: uppercase; }
+        .font_I { font-style: italic; }
+        .border { border-bottom: 1px dashed #999; padding: 0 4px; }
+        .clear { clear: both; }
         
-        /* Tiêu ngữ & Đơn vị */
-        .header-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        .header-table td { vertical-align: top; text-align: center; font-size: 13pt; }
+        /* Định dạng các ô nhập và lựa chọn */
+        span[contenteditable="true"] { display: inline-block; min-width: 30px; background-color: #fafafa; }
+        span[contenteditable="true"]:focus { background-color: #fff; outline: none; border-bottom: 1px solid #000; }
+        select { font-family: "Times New Roman", serif; font-size: 13pt; font-weight: bold; color: red; border: 1px solid #ccc; border-radius: 4px; }
         
-        /* Tiêu đề văn bản */
-        .title { text-align: center; font-weight: bold; margin-bottom: 30px; text-transform: uppercase; font-size: 15pt; }
-        
-        /* Phần thân văn bản */
-        .content { text-align: justify; margin-bottom: 20px; }
-        
-        /* Các ô nhập liệu hoặc hiển thị dữ liệu */
-        .dynamic-data { font-weight: bold; color: #000; display: inline-block; }
-        span[contenteditable="true"] { border-bottom: 1px dashed #666; padding: 0 5px; background-color: #fcfcfc; }
-        span[contenteditable="true"]:focus { background-color: #fff; border-bottom: 1px solid #000; outline: none; }
-        
-        /* Định dạng các Dropdown chọn nhanh */
-        select { font-family: "Times New Roman", serif; font-size: 14pt; border: 1px solid #ccc; padding: 2px; border-radius: 4px; font-weight: bold; }
-        
-        /* Phần ký tên */
-        .footer-table { width: 100%; border-collapse: collapse; margin-top: 40px; }
-        .footer-table td { text-align: center; vertical-align: top; width: 50%; }
+        .khung_chu_ky { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 15px; }
+        .khung_chu_ky td { width: 50%; vertical-align: top; }
+        .ghichu { color: #888; font-weight: normal; font-size: 11pt; font-style: italic; }
 
-        /* Nút in ấn ẩn đi khi in thực tế */
-        .no-print-zone { background: #f1f1f1; padding: 10px; margin-bottom: 20px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ccc; }
-        .btn-print { background-color: #007bff; color: white; border: none; padding: 8px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        /* Vùng thanh công cụ điều khiển nổi (Thay thế cho các file ảnh ổ C dễ bị lỗi hiển thị) */
+        .system-action-bar { position: fixed; top: 10px; right: 10px; background: rgba(240,240,240,0.95); padding: 8px; border-radius: 8px; border: 1px solid #ccc; display: flex; flex-direction: column; gap: 8px; z-index: 9999; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .sys-btn { border: none; padding: 6px 12px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 12px; text-align: center; }
+        .btn-p { background-color: #007bff; color: white; }
+        .btn-s { background-color: #28a745; color: white; }
+        .btn-r { background-color: #6c757d; color: white; }
+
         @media print {
-            .no-print-zone { display: none; }
-            body { margin: 20px; width: 100%; }
-            span[contenteditable="true"] { border-bottom: none; background: transparent; }
+            .system-action-bar { display: none !important; }
+            span[contenteditable="true"] { border-bottom: none !important; background: transparent !important; }
+            body { margin: 15px; width: 100%; }
         }
     </style>
-</head>
-<!-- TỰ ĐỘNG CHẠY HÀM ĐÓN DỮ LIỆU KHI TẢI TRANG -->
-<body onload="load_page()">
 
-    <!-- THANH CÔNG CỤ (ẨN KHI IN) -->
-    <div class="no-print-zone">
-        <span style="font-size: 11pt; color: #555; font-style: italic;">* Biểu mẫu đã tự động điền dữ liệu. Bạn có thể nhấp chuột vào các chỗ gạch chân để gõ thêm nội dung nếu cần.</span>
-        <button class="btn-print" onclick="window.print()">🖨️ IN BIỂU MẪU (FILE PDF)</button>
-    </div>
-
-    <!-- CƠ CẤU TIÊU NGỮ HÀNH CHÍNH -->
-    <table class="header-table">
-        <tr>
-            <td width="45%">
-                <span id="hien_thi_don_vi" style="text-transform: uppercase;">CÔNG AN KÌU PHÚ</span><br>
-                <strong>ĐỊA BÀN: <span id="hien_thi_chuc_vu" contenteditable="true">XÃ KIỀU PHÚ</span></strong>
-            </td>
-            <td width="55%">
-                <strong>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</strong><br>
-                <span style="text-decoration: underline;">Độc lập - Tự do - Hạnh phúc</span><br>
-                <span style="font-style: italic; font-size: 12pt;">Kiều Phú, ngày..... tháng..... năm 2026</span>
-            </td>
-        </tr>
-    </table>
-
-    <!-- TIÊU ĐỀ CHÍNH -->
-    <div class="title">
-        BÁO CÁO NHẬN XÉT, ĐÁNH GIÁ TÌNH HÌNH<br>
-        VÀ KẾT QUẢ HOẠT ĐỘNG CỦA LỰC LƯỢNG MẬT
-    </div>
-
-    <!-- NỘI DUNG VĂN BẢN -->
-    <div class="content">
-        Kính gửi: Lãnh đạo Công an huyện Quốc Oai.<br><br>
-        
-        Thực hiện kế hoạch công tác tuần/tháng, Cán bộ địa bàn tiến hành kiểm tra, đánh giá và nhận xét tình hình hoạt động của đối tượng quản lý nghiệp vụ với các nội dung cụ thể sau:<br><br>
-        
-        1. Họ và tên người được nhận xét: <span id="HT" class="dynamic-data" style="font-size: 15pt;">[Chưa có dữ liệu]</span> 
-        <span id="lbl311" style="color:red; font-size:11pt;">(Chưa nhận được tên từ bảng)</span><br>
-        
-        2. Phân loại lực lượng mật: 
-        <!-- Giữ nguyên ID để tương thích logic phân loại của bạn -->
-        <span id="nhap_ll" style="display:none;"></span>
-        <span id="nhap_ll_khac" style="display:none;"></span>
-        <span id="LL">
-            <select id="luc_luong">
-                <option value="CSBM">CSBM</option>
-                <option value="ĐT">ĐT</option>
-                <option value="CTVDD">CTVDD</option>
-                <option value="chủ HTBM">chủ HTBM</option>
-                <option value="NAT">NAT</option>
-            </select>
-        </span><br>
-
-        3. Bí danh sử dụng trong hoạt động: <span contenteditable="true" class="dynamic-data" style="min-width: 150px;">[Bí danh]</span><br>
-        
-        4. Hồ sơ lưu trữ số: <span contenteditable="true" class="dynamic-data" style="min-width: 150px;">[Số hồ sơ]</span><br><br>
-        
-        <strong>I. ĐÁNH GIÁ KẾT QUẢ ĐẠT ĐƯỢC:</strong><br>
-        Trong thời gian qua, đối tượng đã cung cấp nhiều nguồn tin có giá trị liên quan đến an ninh trật tự trên địa bàn phụ trách. Ý thức chấp hành pháp luật và quy định nghiệp vụ thực hiện nghiêm túc, giữ vững nguyên tắc bí mật.<br>
-        - Nội dung bổ sung cụ thể: <span contenteditable="true" style="display: inline-block; width: 80%;">.........................................................................................................................................................</span><br><br>
-        
-        <strong>II. PHÂN LOẠI CHẤT LƯỢNG HOẠT ĐỘNG:</strong><br>
-        Căn cứ vào hiệu quả tinh thông và số lượng tin tức thu thập được, phân loại mức độ hoàn thành nhiệm vụ kỳ này đạt mức: 
-        <span id="nhap_pl" style="display:none;">Khá</span> <!-- Dòng text ẩn để nhận diện logic cũ nếu cần -->
-        <select id="phan_loai">
-            <option value="0">Xuất sắc</option>
-            <option value="1">Khá</option>
-            <option value="2">Trung bình</option>
-            <option value="3">Kém</option>
-        </select>
-    </div>
-
-    <!-- KHU VỰC KÝ TÊN -->
-    <table class="footer-table">
-        <tr>
-            <td>
-                <strong>Ý KIẾN BAN CHỈ HUY CA XÃ</strong><br>
-                <span style="font-size: 11pt; font-style: italic;">(Ký, ghi rõ họ tên)</span>
-                <br><br><br><br><br>
-                <strong style="text-transform: uppercase;">......................................</strong>
-            </td>
-            <td>
-                <strong>CÁN BỘ BÁO CÁO</strong><br>
-                <span style="font-size: 11pt; font-style: italic;">(Ký, ghi rõ họ tên)</span>
-                <br><br><br><br>
-                <span id="ky_ten_cap_bac" style="font-style: italic; font-size: 13pt;">[Cấp bậc]</span><br>
-                <strong id="ky_ten_can_bo" style="text-transform: uppercase; font-size: 14pt;">[Tên cán bộ]</strong>
-            </td>
-        </tr>
-    </table>
-
-    <!-- SCRIPT TỰ ĐỘNG BÓC DỮ LIỆU TỪ URL SANG BIỂU MẪU -->
-    <script>
+    <script type='text/javascript'>
         function load_page() {
-            // 1. Tự động bóc tách dữ liệu truyền từ thanh địa chỉ link (URL) sang
+            // --- BẮT ĐẦU: KHU VỰC ĐÓN DỮ LIỆU TỰ ĐỘNG TỪ TRANG QUẢN LÝ ---
             const urlParams = new URLSearchParams(window.location.search);
             
-            // Đổ họ tên vào ô ID "HT"
+            // 1. Đổ dữ liệu Cán bộ báo cáo
+            if (urlParams.has('cbten')) {
+                const spans = document.querySelectorAll('.content span.border');
+                if(spans.length >= 4) {
+                    spans[0].innerHTML = urlParams.get('cbten'); // Tên CB
+                    if(urlParams.has('cbcapbac')) spans[1].innerHTML = urlParams.get('cbcapbac');
+                    if(urlParams.has('cbchucvu')) spans[2].innerHTML = urlParams.get('cbchucvu');
+                    if(urlParams.has('cbdonvi')) spans[3].innerHTML = urlParams.get('cbdonvi');
+                }
+            }
+
+            // 2. Đổ dữ liệu Đối tượng quản lý
             if (urlParams.has('hoten')) {
                 document.getElementById('HT').innerHTML = urlParams.get('hoten');
                 if (document.getElementById('lbl311')) document.getElementById('lbl311').style.display = 'none';
             }
             
-            // Tự động tìm và chọn đúng Loại lực lượng mật trên Dropdown
-            if (urlParams.has('loai')) {
-                const loai_cs = urlParams.get('loai');
-                const ddl_ll = document.getElementById('luc_luong');
-                for (let i = 0; i < ddl_ll.options.length; i++) {
-                    if (ddl_ll.options[i].text.toLowerCase() === loai_cs.toLowerCase() || ddl_ll.options[i].value.toLowerCase() === loai_cs.toLowerCase()) {
-                        ddl_ll.selectedIndex = i;
-                        break;
-                    }
+            // Bí danh và Số hồ sơ dựa vào thứ tự xuất hiện
+            if (urlParams.has('bidanh') || urlParams.has('sohs')) {
+                const targetSpans = document.querySelectorAll('#HT ~ span.border');
+                if (targetSpans.length >= 2) {
+                    if (urlParams.has('bidanh')) targetSpans[0].innerHTML = urlParams.get('bidanh');
+                    if (urlParams.has('sohs')) targetSpans[1].innerHTML = urlParams.get('sohs');
                 }
             }
 
-            // Tự động tìm ô điền Bí danh và Số hồ sơ dựa trên các thẻ có thuộc tính sửa đổi contenteditable
-            const contentSpans = document.querySelectorAll('.content span[contenteditable], .content [contenteditable="true"]');
-            if (contentSpans.length >= 2) {
-                if (urlParams.has('bidanh')) contentSpans[0].innerHTML = urlParams.get('bidanh');
-                if (urlParams.has('sohs')) contentSpans[1].innerHTML = urlParams.get('sohs');
+            // 3. Tự động thiết lập Ngày/Tháng/Năm hiện tại cho văn bản
+            const ngàyNay = new Date();
+            const oNgay = document.querySelectorAll('.o_nhap_ngay');
+            const oThang = document.querySelectorAll('.o_nhap_thang');
+            const oNam = document.querySelectorAll('.o_nhap_nam');
+            
+            oNgay.forEach(el => el.innerHTML = ngàyNay.getDate());
+            oThang.forEach(el => el.innerHTML = ngàyNay.getMonth() + 1);
+            oNam.forEach(el => el.innerHTML = ngàyNay.getFullYear());
+            // --- KẾT THÚC KHU VỰC ĐÓN DỮ LIỆU TỰ ĐỘNG ---
+
+            // --- GIỮ NGUYÊN HOÀN TOÀN LOGIC XỬ LÝ GỐC CỦA BẠN ---
+            var span_pl = document.getElementById('nhap_pl').innerHTML.trim();
+            var DDL_PL = document.getElementById('phan_loai');
+            if(urlParams.has('loai')) {
+                // Ưu tiên điền nhanh loại lực lượng từ trang quản lý chuyển sang nếu có
+                document.getElementById('nhap_ll').innerHTML = urlParams.get('loai');
+                document.getElementById('LL').innerHTML = '&nbsp;' + urlParams.get('loai');
+                document.getElementById('LL1').innerHTML = urlParams.get('loai');
             }
-
-            // Tự động đổ dữ liệu thông tin Cán bộ quản lý vào phần tiêu đề và chữ ký
-            if (urlParams.has('cbten')) document.getElementById('ky_ten_can_bo').innerHTML = urlParams.get('cbten');
-            if (urlParams.has('cbcapbac')) document.getElementById('ky_ten_cap_bac').innerHTML = urlParams.get('cbcapbac') + ".";
-            if (urlParams.has('cbdonvi')) document.getElementById('hien_thi_don_vi').innerHTML = urlParams.get('cbdonvi');
-            if (urlParams.has('cbchucvu')) document.getElementById('hien_thi_chuc_vu').innerHTML = urlParams.get('cbchucvu');
-
-            // 2. Logic xử lý trạng thái phân loại mặc định ban đầu
-            const span_pl = document.getElementById('nhap_pl').innerHTML.trim();
-            const DDL_PL = document.getElementById('phan_loai');
+            
             switch (span_pl) {
-                case 'Xuất sắc': DDL_PL.value = "0"; break;
-                case 'Khá': DDL_PL.value = "1"; break;
-                case 'Trung bình': DDL_PL.value = "2"; break;
-                case 'Kém': DDL_PL.value = "3"; break;
+                case 'Xuất sắc': DDL_PL.value = 0; break;
+                case 'Khá': DDL_PL.value = 1; break;
+                case 'Trung bình': DDL_PL.value = 2; break;
+                case 'Kém': DDL_PL.value = 3; break;
+            }
+            document.getElementById('nhap_pl').style.display = 'none';
+            document.getElementById('phan_loai').style.display = 'inline-block';
+            
+            document.getElementById('nhap_ll').style.display = 'none';
+            document.getElementById('nhap_ll_khac').style.display = 'inline-block';
+            document.getElementById('LL').style.display = 'inline-block';
+            
+            var span_ll = document.getElementById('nhap_ll').innerHTML.trim();
+            var DDL_LL = document.getElementById('luc_luong');
+            
+            switch (span_ll) {
+                case 'ĐT': DDL_LL.value = 1; break;
+                case 'CTVDD': DDL_LL.value = 2; break;
+                case 'CSBM': DDL_LL.value = 3; break;
+                case 'chủ HTBM': DDL_LL.value = 4; break;
+                case 'NAT': DDL_LL.value = 5; break;
+                case 'Khác': DDL_LL.value = 6; break;
             }
         }
+
+        function hide_note(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function on_change_ll() {
+            var get_gt = document.getElementById('luc_luong');
+            switch (get_gt.value) {
+                case '1':
+                    document.getElementById('nhap_ll').innerHTML = document.getElementById("luc_luong1").innerHTML;
+                    document.getElementById('LL1').innerHTML = document.getElementById("luc_luong1").innerHTML;
+                    break;
+                case '2':
+                    document.getElementById('nhap_ll').innerHTML = document.getElementById("luc_luong2").innerHTML;
+                    document.getElementById('LL1').innerHTML = document.getElementById("luc_luong2").innerHTML;
+                    break;
+                case '3':
+                    document.getElementById('nhap_ll').innerHTML = document.getElementById("luc_luong3").innerHTML;
+                    document.getElementById('LL1').innerHTML = document.getElementById("luc_luong3").innerHTML;
+                    break;
+                case '4':
+                    document.getElementById('nhap_ll').innerHTML = document.getElementById("luc_luong4").innerHTML;
+                    document.getElementById('LL1').innerHTML = document.getElementById("luc_luong4").innerHTML;
+                    break;
+                case '5':
+                    document.getElementById('nhap_ll').innerHTML = document.getElementById("luc_luong5").innerHTML;
+                    document.getElementById('LL1').innerHTML = document.getElementById("luc_luong5").innerHTML;
+                    break;
+                case '6':
+                    document.getElementById('nhap_ll').innerHTML = '';
+                    document.getElementById('LL1').innerHTML = '';
+                    break;
+            }
+        }
+
+        function on_change_pl() {
+            var get_gt = document.getElementById('phan_loai');
+            switch (get_gt.value) {
+                case '0': document.getElementById('nhap_pl').innerHTML = document.getElementById("phan_loai0").innerHTML; break;
+                case '1': document.getElementById('nhap_pl').innerHTML = document.getElementById("phan_loai1").innerHTML; break;
+                case '2': document.getElementById('nhap_pl').innerHTML = document.getElementById("phan_loai2").innerHTML; break;
+                case '3': document.getElementById('nhap_pl').innerHTML = document.getElementById("phan_loai3").innerHTML; break;
+            }
+        }
+
+        function save() {
+            var htmlContent = ['<!DOCTYPE html>\n<html lang="en" id="bieumau">\n' + document.getElementById('bieumau').innerHTML + '\n</html>'];
+            var bl = new Blob(htmlContent, {type: "text/html"});
+            var a = document.createElement("a");
+            a.href = URL.createObjectURL(bl);
+            a.download = document.title + ".html";
+            a.hidden = true;
+            document.body.appendChild(a);
+            a.click();
+        }
+
+        function In_bieu_mau() {
+            alert('Tài liệu này lưu vào hồ sơ cá nhân của LLBM, hồ sơ HT, AT, LN.');
+            document.getElementById('nhap_ll').style.display = 'inline-block';
+            document.getElementById('luc_luong').style.display = 'none';
+            document.getElementById('nhap_pl').style.display = 'inline-block';
+            document.getElementById('phan_loai').style.display = 'none';
+            window.print();
+            document.getElementById('nhap_ll').style.display = 'none';
+            document.getElementById('luc_luong').style.display = 'inline-block';
+            document.getElementById('nhap_pl').style.display = 'none';
+            document.getElementById('phan_loai').style.display = 'inline-block';
+        }
     </script>
+</head>
+
+<body class="font14 ta_jus" onload="load_page()">
+
+    <!-- BỘ NÚT ĐIỀU KHIỂN HỆ THỐNG MỚI (TỰ ĐỘNG ẨN KHI IN ẤN PHÁT HÀNH) -->
+    <div class="system-action-bar">
+        <button class="sys-btn btn-p" onclick="In_bieu_mau()">🖨️ IN BIỂU MẪU</button>
+        <button class="sys-btn btn-s" onclick="save()">💾 LƯU FILE</button>
+        <button class="sys-btn btn-r" onclick="window.location.reload(true);">🔄 LÀM MỚI</button>
+    </div>
+
+    <div class="wrapper border">
+        <!-- ĐƠN VỊ BAN HÀNH QUY CHUẨN -->
+        <div class="td_bieumau ta_center f_right lh_06" style='margin-right:0.5cm'>
+            <span class="font9">Mẫu BL3</span><br>
+            <span class="font9">BH theo TT số 26/2023/TT-BCA</span><br>
+            <span class="font9">Ngày 03/7/2023</span><br>
+        </div>
+        
+        <!-- TIÊU NGỮ HÀNH CHÍNH -->
+        <div class="header" style='width:100%;clear:both'>
+            <div class="cq_banhanh f_left ta_center font12">
+                <span contenteditable="true" class="border font12 co_quan" onkeypress='hide_note("lbl1")'>
+                    <label id='lbl1' class='ghichu'>Đơn vị cấp trên</label>
+                </span><br>
+                <span contenteditable="true" class="border fontBold font12 co_quan" onkeypress='hide_note("lbl2")'>
+                    <label id='lbl2' class='ghichu'>Đơn vị báo cáo</label>
+                </span>
+                <div style='min-height:1px;border-top:1px solid black; width: 1.5cm;margin:0 auto'></div>
+            </div>
+            <div style='width:200px;float:left'></div>
+            <div class="quochieu ta_center f_left">
+                <span class="fontUpper fontBold font13">cộng hòa xã hội chủ nghĩa Việt nam</span><br>
+                <span class="fontBold font14">Độc lập - Tự do - Hạnh phúc</span>
+                <div style='min-height:1px;border-top:1px solid black; width: 6cm;margin:0 auto;margin-top:2px'></div>
+            </div>
+            <div class="time_header font_I" style='margin-top:10px;margin-right:2cm;float:right;'>
+                <span class="dia_danh border" contenteditable="true">Địa bàn</span>, ngày <span class="o_nhap_ngay border" contenteditable="true"></span> tháng <span class="o_nhap_thang border" contenteditable="true"></span> năm <span class="o_nhap_nam border" contenteditable="true"></span>
+            </div>
+        </div>
+
+        <!-- THÂN VĂN BẢN CHÍNH -->
+        <div class="content">
+            <div class="font16 fontBold ta_center fontUpper clear"><br>BÁO CÁO<br>
+                <span class='fontLow'>
+                    <b>Nhận xét định kỳ về hoạt động của</b>
+                    <select id="luc_luong" onchange="on_change_ll()">
+                        <option value="0" id="gioi_tinh_ko">-----</option>
+                        <option value="1" id="luc_luong1">ĐT</option>
+                        <option value="2" id="luc_luong2">CTVDD</option>
+                        <option value="3" id="luc_luong3">CSBM</option>
+                        <option value="4" id="luc_luong4">chủ HTBM</option>
+                        <option value="5" id="luc_luong5">NAT</option>
+                        <option value="6" id="luc_luong6">Khác</option>
+                    </select>
+                    <span id="nhap_ll" class=""></span>
+                    <span id="nhap_ll_khac" class="o_nhap_1cm border ta_left" contenteditable="true" onkeyup="document.getElementById('LL').innerHTML='&nbsp;' + document.getElementById('nhap_ll_khac').innerHTML;"></span>
+                </span>
+                <div class='ta_center fontNorm fontLow' style="font-size:13pt; text-transform:none; margin-top:5px;">
+                    (Từ ngày: <span class='o_nhap_2cm border ta_left' contenteditable="true"></span> 
+                    đến ngày: <span class='o_nhap_2cm border ta_left' contenteditable="true"></span>)
+                    <div id='duong_ke' style='min-height:1px;border-top:1px solid black;width:6cm;margin:0 auto;margin-top:2px'></div>
+                </div>
+            </div>
+
+            <div class="ta_center clear" style="margin-top:15px;">
+                <span style='vertical-align:top'>Kính gửi: </span> 
+                <span class="o_nhap_1cm border ta_left" id='1' contenteditable="true" style="min-width:200px;">Lãnh đạo đơn vị cấp trên</span>
+            </div><br>
+
+            Tôi: <span class='o_nhap_1cm border' contenteditable="true" style="font-weight:bold;"></span>; Cấp bậc: <span class='o_nhap_3cm border' contenteditable="true"></span><br>
+            Chức vụ: <span class='o_nhap_1cm border' contenteditable="true"></span>; Đơn vị: <span class='o_nhap_3cm border' contenteditable="true"></span><br>
+            Báo cáo nhận xét định kỳ về hoạt động của <span class='ghichu_font15' id='LL1' contenteditable="true"></span><span class='ghichu_font15' id='LL' contenteditable="true"></span> như sau;<br>
+            
+            Họ và tên: <span class='o_nhap_3cm border fontUpper' id='HT' contenteditable="true" onkeypress='hide_note("lbl311")' style='min-width: 161px; font-weight:bold;'><label class='ghichu' id='lbl311' style='text-transform:none'>Viết in hoa đủ dấu</label></span>
+            Bí danh: <span class='o_nhap_3cm border' contenteditable="true" style='min-width:80px; font-weight:bold;'></span>
+            Số hồ sơ: <span class='o_nhap_3cm border' contenteditable="true" style='min-width:100px; font-weight:bold;'></span><br>
+
+            <!-- CÁC MỤC NỘI DUNG CHUYÊN MÔN -->
+            <div class='lh_1' style='margin-top:8px;'><span class='fontBold'>I. NHIỆM VỤ ĐÃ GIAO:</span></div>
+            <div class='o_nhap_n_dong border' contenteditable="true" style="min-height:40px; background:#fffdf0; padding:4px;">- Nhập các nhiệm vụ công tác được giao trong kỳ...</div>
+
+            <div class='lh_1' style='margin-top:8px;'><span class='fontBold'>II. KẾT QUẢ ĐÃ THỰC HIỆN ĐƯỢC:</span></div>
+            <div class='o_nhap_n_dong border' contenteditable="true" style="min-height:40px; background:#fffdf0; padding:4px;">- Kết quả cụ thể tình hình địa bàn...</div>
+
+            <div class='lh_1' style='margin-top:8px;'><span class='fontBold'>III. ƯU ĐIỂM VÀ TỒN TẠI:</span> <font class='font_I font12 fontNorm'>(Đối với ĐT, CTVDD, CSBM, LLBM nêu rõ số lần sinh hoạt trong kì nhận xét; số lượng tin, chất lượng tin, việc xử lý tin; ý thức cộng tác. Đối với chủ HTBM, NAT và NNV: Đánh giá mức độ thuận lợi, đảm bảo an toàn, bí mật; kết quả, số lượng sinh hoạt LLBM tại HT, AT, LN).</font></div>
+            <div class='o_nhap_n_dong border' contenteditable="true" style="min-height:50px; background:#fffdf0; padding:4px;">- Đánh giá ưu điểm, tồn tại chi tiết...</div>
+
+            <div class='lh_1' style='margin-top:8px;'><span class='fontBold'>IV. NHẬN XÉT ĐÁNH GIÁ CHUNG:</span></div>
+            <div class='o_nhap_n_dong border' contenteditable="true" style="min-height:40px; background:#fffdf0; padding:4px;">- Đánh giá chung về quá trình cộng tác...</div>
+
+            <div class='lh_1' style='margin-top:8px;'><span class='fontBold'>V. PHÂN LOẠI:</span>
+                <select id="phan_loai" onchange="on_change_pl()">
+                    <option value="">-----</option>
+                    <option value="0" id="phan_loai0">Xuất sắc</option>
+                    <option value="1" id="phan_loai1">Khá</option>
+                    <option value="2" id="phan_loai2">Trung bình</option>
+                    <option value="3" id="phan_loai3">Kém</option>
+                </select>
+                <span id="nhap_pl" class="fontBold"></span>
+            </div>
+
+            <!-- CHẾ ĐỘ CHÍNH SÁCH VÀ ĐỀ XUẤT -->
+            <div style="margin-top:10px;"><b>VI. NHỮNG CHÍNH SÁCH CHẾ ĐỘ ĐÃ THỰC HIỆN:</b></div>
+            <div class='o_nhap_n_dong border' contenteditable="true" style="min-height:30px; background:#fffdf0; padding:4px;">- Các chế độ chính sách chi trả phụ cấp, bồi dưỡng bám địa bàn...</div>
+
+            <div style="margin-top:10px;"><b>VII. ĐỀ XUẤT CỦA CÁN BỘ:</b></div>
+            <div class='o_nhap_n_dong border' contenteditable="true" style="min-height:40px; background:#fffdf0; padding:4px;">- Đề xuất phương hướng quản lý tiếp theo...</div>
+
+            <!-- CHỮ KÝ CÁN BỘ -->
+            <table class='khung_chu_ky'>
+                <tr>
+                    <td></td>
+                    <td class='ta_center lh_1'>
+                        <span class='fontBold'>CÁN BỘ BÁO CÁO</span><br>
+                        <span class='fontNorm font13 font_I'>(Ký, ghi rõ họ tên)</span>
+                        <br><br><br><br><br>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- PHẦN XÊ DUYỆT CỦA CẤP TRÊN -->
+            <span class='fontBold'>VIII. Ý KIẾN CỦA LÃNH ĐẠO CÓ THẨM QUYỀN:</span><br>
+            <div style='width: 100%; clear:both; line-height:1.8em' class="border" contenteditable="true">
+                <span style="color:#666; font-style:italic;">(Phần ghi ý kiến phê duyệt lãnh đạo cấp trên...)</span><br><br><br>
+            </div>
+            
+            <table class='khung_chu_ky'>
+                <tr>
+                    <td></td>
+                    <td class='ta_center'>
+                        <div class='font_I fontNorm'>
+                            Ngày <span class='o_nhap_ngay border' contenteditable="true"></span> tháng <span class='o_nhap_thang border' contenteditable="true"></span> năm <span class='o_nhap_nam border' contenteditable="true"></span><br>
+                        </div>
+                        <div class='lh_1' style='margin-top:5px'>
+                            <span class='fontBold'>LÃNH ĐẠO CÓ THẨM QUYỀN</span><br>
+                            <span class='fontNorm font13 font_I'>(Ký, ghi rõ họ tên)</span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
 </body>
 </html>
