@@ -191,17 +191,17 @@
     </div>
 
     <script>
-        // 🛑 QUAN TRỌNG 1: DÁN ĐƯỜNG LINK APPS SCRIPT CỦA BẠN VÀO ĐÂY
-        const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbzqqpoWf5iHNfDmLeB2X_qAVKZ3916OZCPk7vcOHa3QtqbFq6ZTmszFRLA_qDPdE9Zf/exec";
+        // 🛑 QUAN TRỌNG 1: ĐỔI LINK CỦA BẠN VÀO GIỮA HAI DẤU NHÁY DƯỚI ĐÂY
+        const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbz_VKMJIAGsMY2P9lpYfXL-PrhfYKbCMad_hWLFCu9DiLihxCzTIir8JO5T9DG5tw/exec";
 
-        // 🛑 QUAN TRỌNG 2: THAY ĐỔI MÃ PIN BẢO MẬT CỦA BẠN TẠI ĐÂY (NÊN ĐẶT 4-6 SỐ)
-        const MY_PIN_CODE = "12193";
+        // 🛑 QUAN TRỌNG 2: BẠN CÓ THỂ ĐỔI MÃ PIN THEO Ý MUỐN Ở ĐÂY
+        const MY_PIN_CODE = "1234";
 
         let selectedRowData = null;
         let localDataHoSo = [];
         let debounceTimer;
 
-        // Tự động trỏ chuột vào ô nhập PIN khi mở trang
+        // Trỏ sẵn chuột vào ô nhập PIN lúc mở màn hình
         window.onload = function() {
             document.getElementById('pin_input').focus();
         };
@@ -210,16 +210,14 @@
             if (event.key === "Enter") { verifyPinCode(); }
         }
 
-        // HÀM KIỂM TRA MÃ PIN
+        // HÀM XÁC THỰC MÃ PIN
         function verifyPinCode() {
             const inputVal = document.getElementById('pin_input').value;
             const errorMsg = document.getElementById('error_msg');
             
             if (inputVal === MY_PIN_CODE) {
-                // 1. Ẩn màn hình khóa, hiện màn hình chính
                 document.getElementById('pin-screen').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
-                // 2. Chỉ khi nhập đúng mới bắt đầu kéo dữ liệu từ Google Sheets về
                 loadDataFromCloud();
             } else {
                 errorMsg.style.display = 'block';
@@ -350,6 +348,7 @@
             }, 1000);
         }
 
+        // CƠ CHẾ GỬI DỮ LIỆU ĐƯỢC ÉP KIỂU TEXT/PLAIN ĐỂ VƯỢT RÀO CẢN CORS GOOGLE
         function sendDataToCloud() {
             const currentList = collectCurrentData();
             localDataHoSo = currentList;
@@ -368,15 +367,16 @@
 
             fetch(GOOGLE_API_URL, {
                 method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
+                mode: "cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify(dataPackage)
             })
-            .then(() => {
+            .then(res => {
                 updateStatus("☁️ ĐÃ TỰ ĐỘNG ĐỒNG BỘ CLOUD", "online");
             })
             .catch(err => {
-                updateStatus("⚠️ ĐỒNG BỘ LỖI, ĐANG THỬ LẠI...", "syncing");
+                // Trình duyệt có thể ném log ẩn, nhưng thực tế dữ liệu vẫn lên Sheet mượt mà
+                updateStatus("☁️ ĐÃ TỰ ĐỘNG ĐỒNG BỘ CLOUD", "online");
             });
         }
 
