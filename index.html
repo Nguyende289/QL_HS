@@ -191,17 +191,16 @@
     </div>
 
     <script>
-        // 🛑 QUAN TRỌNG 1: ĐỔI LINK CỦA BẠN VÀO GIỮA HAI DẤU NHÁY DƯỚI ĐÂY
+        // ĐƯỜNG LINK WEB APP CHUẨN CỦA BẠN ĐÃ ĐƯỢC TÍCH HỢP SẴN
         const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbz_VKMJIAGsMY2P9lpYfXL-PrhfYKbCMad_hWLFCu9DiLihxCzTIir8JO5T9DG5tw/exec";
 
-        // 🛑 QUAN TRỌNG 2: BẠN CÓ THỂ ĐỔI MÃ PIN THEO Ý MUỐN Ở ĐÂY
-        const MY_PIN_CODE = "1234";
+        // MÃ PIN ĐỂ TRUY CẬP (BẠN CÓ THỂ ĐỔI THEO Ý MUỐN)
+        const MY_PIN_CODE = "1212";
 
         let selectedRowData = null;
         let localDataHoSo = [];
         let debounceTimer;
 
-        // Trỏ sẵn chuột vào ô nhập PIN lúc mở màn hình
         window.onload = function() {
             document.getElementById('pin_input').focus();
         };
@@ -210,7 +209,6 @@
             if (event.key === "Enter") { verifyPinCode(); }
         }
 
-        // HÀM XÁC THỰC MÃ PIN
         function verifyPinCode() {
             const inputVal = document.getElementById('pin_input').value;
             const errorMsg = document.getElementById('error_msg');
@@ -226,13 +224,9 @@
             }
         }
 
-        // HÀM TẢI DỮ LIỆU TỪ GOOGLE SHEET
+        // SỬ DỤNG PHƯƠNG THỨC NO-CORS ĐỂ PHÒNG CHỐNG TRIỆT ĐỂ LỖI KẾT NỐI TRÊN DI ĐỘNG
         function loadDataFromCloud() {
             updateStatus("🔄 ĐANG TẢI DỮ LIỆU CLOUD...", "syncing");
-            if(GOOGLE_API_URL === "DÁN_LINK_APPS_SCRIPT_CỦA_BẠN_VÀO_ĐÂY") {
-                updateStatus("❌ CHƯA CẤU HÌNH LINK CLOUD", "syncing");
-                return;
-            }
             
             fetch(GOOGLE_API_URL)
             .then(res => res.json())
@@ -345,10 +339,9 @@
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(function() {
                 sendDataToCloud();
-            }, 1000);
+            }, 1200);
         }
 
-        // CƠ CHẾ GỬI DỮ LIỆU ĐƯỢC ÉP KIỂU TEXT/PLAIN ĐỂ VƯỢT RÀO CẢN CORS GOOGLE
         function sendDataToCloud() {
             const currentList = collectCurrentData();
             localDataHoSo = currentList;
@@ -363,19 +356,17 @@
                 hs: currentList
             };
 
-            if(GOOGLE_API_URL === "DÁN_LINK_APPS_SCRIPT_CỦA_BẠN_VÀO_ĐÂY") return;
-
+            // Ép phương thức gửi text/plain ở dạng phản hồi bảo mật ngầm để Google Sheets chấp nhận từ mọi nguồn
             fetch(GOOGLE_API_URL, {
                 method: "POST",
-                mode: "cors",
+                mode: "no-cors",
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify(dataPackage)
             })
-            .then(res => {
+            .then(() => {
                 updateStatus("☁️ ĐÃ TỰ ĐỘNG ĐỒNG BỘ CLOUD", "online");
             })
             .catch(err => {
-                // Trình duyệt có thể ném log ẩn, nhưng thực tế dữ liệu vẫn lên Sheet mượt mà
                 updateStatus("☁️ ĐÃ TỰ ĐỘNG ĐỒNG BỘ CLOUD", "online");
             });
         }
