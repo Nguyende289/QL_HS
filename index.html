@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Quản lý Hồ sơ CSBM</title>
+    <title>Hệ thống Quản lý Hồ sơ CSBM Cloud (Bảo mật)</title>
     <style>
         :root {
             --primary-color: #1a365d;
@@ -16,11 +16,24 @@
         body { font-family: Arial, sans-serif; margin: 10px; background-color: var(--bg-color); color: #333; font-size: 14px; }
         h2 { text-align: center; color: var(--primary-color); text-transform: uppercase; margin: 10px 0; font-size: 18px; }
         
+        /* MÀN HÌNH KHÓA MÃ PIN */
+        #pin-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111a24; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
+        .pin-box { background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; max-width: 320px; width: 85%; }
+        .pin-box h3 { margin-top: 0; color: #38bdf8; letter-spacing: 1px; font-size: 16px; text-transform: uppercase;}
+        .pin-input { width: 100%; padding: 12px; font-size: 22px; text-align: center; border: 2px solid #475569; background: #0f172a; color: #fff; border-radius: 6px; letter-spacing: 5px; box-sizing: border-box; margin-bottom: 15px; }
+        .pin-input:focus { border-color: var(--secondary-color); outline: none; }
+        .btn-unlock { background: var(--secondary-color); color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; }
+        .btn-unlock:hover { background: #0056b3; }
+        .error-msg { color: #f87171; font-size: 12px; margin-top: 8px; display: none; font-weight: bold; }
+
+        /* Giao diện chính sau khi mở khóa */
+        #main-content { display: none; }
+
         /* Thanh công cụ đỉnh */
         .toolbar-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .status-badge { background-color: var(--success-color); color: white; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
-        .btn-settings { background: #6c757d; color: white; border: none; width: 32px; height: 32px; border-radius: 5px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
-        .btn-settings:hover { background: #5a6268; }
+        .status-badge { background-color: #6c757d; color: white; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .online { background-color: var(--success-color) !important; }
+        .syncing { background-color: #ffc107 !important; color: #000 !important; }
 
         /* Bảng thống kê số liệu */
         .thong-ke-box { background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; }
@@ -42,7 +55,6 @@
         .add-flex { display: flex; flex-direction: column; gap: 8px; }
         .add-flex input, .add-flex select { padding: 8px; border: 1px solid #ced4da; border-radius: 4px; width: 100%; box-sizing: border-box; }
         .btn-add { background-color: #17a2b8; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
-        .btn-add:hover { background-color: #138496; }
 
         /* Danh sách dữ liệu chính */
         .table-container { background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto; }
@@ -57,15 +69,6 @@
         .btn-menu { background-color: var(--success-color); color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
         .btn-delete { background-color: var(--danger-color); color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 4px; }
         
-        /* Cửa sổ cài đặt ẩn (Modal Pop-up) */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .modal-content h3 { margin-top: 0; color: var(--primary-color); }
-        .modal-content textarea { width: 100%; height: 100px; box-sizing: border-box; margin-bottom: 10px; font-size: 11px; padding: 5px; }
-        .modal-actions { display: flex; justify-content: space-between; gap: 10px; }
-        .btn-io { background-color: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .btn-close-modal { background-color: #343a40; color: white; }
-
         @media (min-width: 600px) {
             .add-flex { flex-direction: row; }
             .btn-add { width: auto; }
@@ -79,108 +82,107 @@
 </head>
 <body>
 
-    <h2>Hệ thống Quản lý Hồ sơ CSBM</h2>
-
-    <!-- THANH ĐỈNH ĐIỀU HƯỚNG CHỨA NÚT CÀI ĐẶT -->
-    <div class="toolbar-top">
-        <div class="status-badge">🔄 TỰ ĐỘNG LƯU ĐANG BẬT</div>
-        <!-- NÚT CÀI ĐẶT ẨN ĐỒNG BỘ -->
-        <button class="btn-settings" onclick="openModal()" title="Cài đặt đồng bộ thiết bị">⚙️</button>
+    <!-- MÀN HÌNH KHÓA YÊU CẦU MÃ PIN -->
+    <div id="pin-screen">
+        <div class="pin-box">
+            <h3>🔒 HỆ THỐNG ĐÃ KHÓA</h3>
+            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px;">Vui lòng nhập mã PIN bảo mật để truy cập dữ liệu</p>
+            <input type="password" id="pin_input" class="pin-input" maxlength="6" placeholder="••••" onkeydown="checkEnter(event)">
+            <button class="btn-unlock" onclick="verifyPinCode()">MỞ KHÓA HỆ THỐNG</button>
+            <div id="error_msg" class="error-msg">❌ MÃ PIN KHÔNG CHÍNH XÁC!</div>
+        </div>
     </div>
 
-    <!-- BẢNG THỐNG KÊ HỒ SƠ QUẢN LÝ -->
-    <div class="thong-ke-box">
-        <h4>📊 Bảng thống kê dữ liệu nhanh</h4>
-        <table class="tbl-thong-ke">
-            <thead>
-                <tr>
-                    <th style="color: var(--danger-color);">TỔNG SỐ</th>
-                    <th>CSBM</th>
-                    <th>ĐT</th>
-                    <th>CTVDD</th>
-                    <th>chủ HTBM</th>
-                    <th>NAT</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td id="tk_tong" class="txt-total">0</td>
-                    <td id="tk_csbm">0</td>
-                    <td id="tk_dt">0</td>
-                    <td id="tk_ctvdd">0</td>
-                    <td id="tk_htbm">0</td>
-                    <td id="tk_nat">0</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <!-- TOÀN BỘ NỘI DUNG CHÍNH (BỊ GIẤU KHI CHƯA NHẬP MÃ PIN) -->
+    <div id="main-content">
+        <h2>Hệ thống Quản lý Hồ sơ CSBM Cloud</h2>
 
-    <!-- KHU VỰC CỬA SỔ PHỤ ĐỒNG BỘ (BỊ ẨN, CHỈ HIỆN KHI BẤM BÁNH RĂNG) -->
-    <div id="settingsModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3>📲 Đồng bộ dữ liệu thiết bị</h3>
-            <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Sao chép chuỗi mã dưới đây gửi qua Zalo để chuyển dữ liệu sang thiết bị khác.</p>
-            <textarea id="txt_json_data" readonly onclick="this.select()"></textarea>
-            <div class="modal-actions">
-                <button class="btn-io" style="background-color: var(--secondary-color);" onclick="copyJsonCode()">📋 Copy Mã</button>
-                <button class="btn-io" style="background-color: #ffc107; color: #000;" onclick="importJsonCode()">📥 Nạp Mã Nhập</button>
-                <button class="btn-io btn-close-modal" onclick="closeModal()">Đóng</button>
+        <!-- THANH ĐỈNH ĐIỀU HƯỚNG CHỨA ĐÈN BÁO TRẠNG THÁI -->
+        <div class="toolbar-top">
+            <div id="sync_status" class="status-badge">🔄 ĐANG TẢI DỮ LIỆU CLOUD...</div>
+            <button style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: bold;" onclick="loadDataFromCloud()">🔄 Tải Lại</button>
+        </div>
+
+        <!-- BẢNG THỐNG KÊ HỒ SƠ QUẢN LÝ -->
+        <div class="thong-ke-box">
+            <h4>📊 Bảng thống kê dữ liệu nhanh</h4>
+            <table class="tbl-thong-ke">
+                <thead>
+                    <tr>
+                        <th style="color: var(--danger-color);">TỔNG SỐ</th>
+                        <th>CSBM</th>
+                        <th>ĐT</th>
+                        <th>CTVDD</th>
+                        <th>chủ HTBM</th>
+                        <th>NAT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="tk_tong" class="txt-total">0</td>
+                        <td id="tk_csbm">0</td>
+                        <td id="tk_dt">0</td>
+                        <td id="tk_ctvdd">0</td>
+                        <td id="tk_htbm">0</td>
+                        <td id="tk_nat">0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- THÔNG TIN CÁN BỘ QUẢN LÝ -->
+        <div class="cb-info-box">
+            <table>
+                <tr>
+                    <td width="20%"><strong>Tên CB:</strong></td>
+                    <td><input type="text" id="cb_ten" oninput="autoSave()"></td>
+                </tr>
+                <tr>
+                    <td><strong>Cấp bậc:</strong></td>
+                    <td><input type="text" id="cb_capbac" oninput="autoSave()"></td>
+                </tr>
+                <tr>
+                    <td><strong>Chức vụ:</strong></td>
+                    <td><input type="text" id="cb_chucvu" oninput="autoSave()"></td>
+                </tr>
+                <tr>
+                    <td><strong>Đơn vị:</strong></td>
+                    <td><input type="text" id="cb_donvi" oninput="autoSave()"></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- KHUNG THÊM MỚI HỒ SƠ -->
+        <div class="add-box">
+            <h3>➕ Thêm hồ sơ mới</h3>
+            <div class="add-flex">
+                <input type="text" id="add_hoten" placeholder="Họ và tên">
+                <select id="add_loai">
+                    <option value="CSBM">CSBM</option>
+                    <option value="ĐT">ĐT</option>
+                    <option value="CTVDD">CTVDD</option>
+                    <option value="chủ HTBM">chủ HTBM</option>
+                    <option value="NAT">NAT</option>
+                </select>
+                <input type="text" id="add_bidanh" placeholder="Bí danh">
+                <input type="text" id="add_sohs" placeholder="Số hồ sơ">
+                <button class="btn-add" onclick="addNewRow()">Thêm</button>
             </div>
         </div>
-    </div>
 
-    <!-- THÔNG TIN CÁN BỘ QUẢN LÝ -->
-    <div class="cb-info-box">
-        <table>
-            <tr>
-                <td width="20%"><strong>Tên CB:</strong></td>
-                <td><input type="text" id="cb_ten" oninput="autoSave()"></td>
-            </tr>
-            <tr>
-                <td><strong>Cấp bậc:</strong></td>
-                <td><input type="text" id="cb_capbac" oninput="autoSave()"></td>
-            </tr>
-            <tr>
-                <td><strong>Chức vụ:</strong></td>
-                <td><input type="text" id="cb_chucvu" oninput="autoSave()"></td>
-            </tr>
-            <tr>
-                <td><strong>Đơn vị:</strong></td>
-                <td><input type="text" id="cb_donvi" oninput="autoSave()"></td>
-            </tr>
-        </table>
-    </div>
-
-    <!-- KHUNG THÊM MỚI HỒ SƠ -->
-    <div class="add-box">
-        <h3>➕ Thêm hồ sơ mới</h3>
-        <div class="add-flex">
-            <input type="text" id="add_hoten" placeholder="Họ và tên">
-            <select id="add_loai">
-                <option value="CSBM">CSBM</option>
-                <option value="ĐT">ĐT</option>
-                <option value="CTVDD">CTVDD</option>
-                <option value="chủ HTBM">chủ HTBM</option>
-                <option value="NAT">NAT</option>
-            </select>
-            <input type="text" id="add_bidanh" placeholder="Bí danh">
-            <input type="text" id="add_sohs" placeholder="Số hồ sơ">
-            <button class="btn-add" onclick="addNewRow()">Thêm</button>
+        <!-- DANH SÁCH HỒ SƠ QUẢN LÝ -->
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th width="5%">STT</th>
+                        <th>Thông tin chi tiết hồ sơ (Họ tên / Loại / Bí danh / Số HS)</th>
+                        <th width="22%">Tác vụ</th>
+                    </tr>
+                </thead>
+                <tbody id="danh_sach_ho_so" oninput="autoSave()"></tbody>
+            </table>
         </div>
-    </div>
-
-    <!-- DANH SÁCH HỒ SƠ QUẢN LÝ -->
-    <div class="table-container">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th width="5%">STT</th>
-                    <th>Thông tin chi tiết hồ sơ (Họ tên / Loại / Bí danh / Số HS)</th>
-                    <th width="22%">Tác vụ</th>
-                </tr>
-            </thead>
-            <tbody id="danh_sach_ho_so" oninput="autoSave()"></tbody>
-        </table>
     </div>
 
     <!-- MENU BIỂU MẪU ĐỘNG -->
@@ -189,38 +191,72 @@
     </div>
 
     <script>
-        // DỮ LIỆU ĐỂ KHỞI TẠO NẾU CHƯA CÓ TRONG LƯU TRỮ
-        const DEFAULT_CAN_BO = { ten_cb: "Nguyễn Văn A", cap_bac: "Đại úy", chuc_vu: "Cán bộ địa bàn", don_vi: "Công an xã Kiều Phú" };
-        const DEFAULT_HO_SO = [
-            { ho_ten: "NGUYỄN VĂN BÌNH", loai_cs: "CSBM", bi_danh: "Thanh Sơn", so_ho_so: "HS-CSBM-2026/01" },
-            { ho_ten: "TRẦN THỊ MAI", loai_cs: "ĐT", bi_danh: "Hồng Hà", so_ho_so: "HS-DT-2026/02" }
-        ];
+        // 🛑 QUAN TRỌNG 1: DÁN ĐƯỜNG LINK APPS SCRIPT CỦA BẠN VÀO ĐÂY
+        const GOOGLE_API_URL = "DÁN_LINK_APPS_SCRIPT_CỦA_BẠN_VÀO_ĐÂY";
+
+        // 🛑 QUAN TRỌNG 2: THAY ĐỔI MÃ PIN BẢO MẬT CỦA BẠN TẠI ĐÂY (NÊN ĐẶT 4-6 SỐ)
+        const MY_PIN_CODE = "1234";
 
         let selectedRowData = null;
         let localDataHoSo = [];
+        let debounceTimer;
 
+        // Tự động trỏ chuột vào ô nhập PIN khi mở trang
         window.onload = function() {
-            const savedCB = localStorage.getItem('MOBILE_DATA_CB');
-            const savedHS = localStorage.getItem('MOBILE_DATA_HS');
-
-            if (savedCB && savedHS) {
-                const cbObj = JSON.parse(savedCB);
-                document.getElementById('cb_ten').value = cbObj.ten_cb || '';
-                document.getElementById('cb_capbac').value = cbObj.cap_bac || '';
-                document.getElementById('cb_chucvu').value = cbObj.chuc_vu || '';
-                document.getElementById('cb_donvi').value = cbObj.don_vi || '';
-                localDataHoSo = JSON.parse(savedHS);
-            } else {
-                document.getElementById('cb_ten').value = DEFAULT_CAN_BO.ten_cb;
-                document.getElementById('cb_capbac').value = DEFAULT_CAN_BO.cap_bac;
-                document.getElementById('cb_chucvu').value = DEFAULT_CAN_BO.chuc_vu;
-                document.getElementById('cb_donvi').value = DEFAULT_CAN_BO.don_vi;
-                localDataHoSo = [...DEFAULT_HO_SO];
-            }
-            renderTable();
-            tinhThongKe();
-            updateJsonOutput();
+            document.getElementById('pin_input').focus();
         };
+
+        function checkEnter(event) {
+            if (event.key === "Enter") { verifyPinCode(); }
+        }
+
+        // HÀM KIỂM TRA MÃ PIN
+        function verifyPinCode() {
+            const inputVal = document.getElementById('pin_input').value;
+            const errorMsg = document.getElementById('error_msg');
+            
+            if (inputVal === MY_PIN_CODE) {
+                // 1. Ẩn màn hình khóa, hiện màn hình chính
+                document.getElementById('pin-screen').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                // 2. Chỉ khi nhập đúng mới bắt đầu kéo dữ liệu từ Google Sheets về
+                loadDataFromCloud();
+            } else {
+                errorMsg.style.display = 'block';
+                document.getElementById('pin_input').value = '';
+                document.getElementById('pin_input').focus();
+            }
+        }
+
+        // HÀM TẢI DỮ LIỆU TỪ GOOGLE SHEET
+        function loadDataFromCloud() {
+            updateStatus("🔄 ĐANG TẢI DỮ LIỆU CLOUD...", "syncing");
+            if(GOOGLE_API_URL === "DÁN_LINK_APPS_SCRIPT_CỦA_BẠN_VÀO_ĐÂY") {
+                updateStatus("❌ CHƯA CẤU HÌNH LINK CLOUD", "syncing");
+                return;
+            }
+            
+            fetch(GOOGLE_API_URL)
+            .then(res => res.json())
+            .then(data => {
+                if(data.cb && data.hs) {
+                    document.getElementById('cb_ten').value = data.cb.ten_cb || '';
+                    document.getElementById('cb_capbac').value = data.cb.cap_bac || '';
+                    document.getElementById('cb_chucvu').value = data.cb.chuc_vu || '';
+                    document.getElementById('cb_donvi').value = data.cb.don_vi || '';
+                    localDataHoSo = data.hs;
+                    renderTable();
+                    tinhThongKe();
+                    updateStatus("☁️ ĐỒNG BỘ CLOUD: SẴN SÀNG", "online");
+                } else {
+                    updateStatus("☁️ CLOUD TRỐNG (MỚI KHỞI TẠO)", "online");
+                }
+            })
+            .catch(err => {
+                updateStatus("⚠️ LỖI KẾT NỐI CLOUD", "syncing");
+                console.error(err);
+            });
+        }
 
         function renderTable() {
             const tbody = document.getElementById('danh_sach_ho_so');
@@ -244,11 +280,9 @@
             });
         }
 
-        // HÀM TÍNH TOÁN BẢNG THỐNG KÊ TỰ ĐỘNG
         function tinhThongKe() {
             let tong = localDataHoSo.length;
             let csbm = 0, dt = 0, ctvdd = 0, htbm = 0, nat = 0;
-
             localDataHoSo.forEach(item => {
                 let loai = (item.loai_cs || '').trim().toLowerCase();
                 if (loai === 'csbm') csbm++;
@@ -257,7 +291,6 @@
                 else if (loai === 'chủ htbm' || loai === 'htbm') htbm++;
                 else if (loai === 'nat') nat++;
             });
-
             document.getElementById('tk_tong').innerText = tong;
             document.getElementById('tk_csbm').innerText = csbm;
             document.getElementById('tk_dt').innerText = dt;
@@ -308,63 +341,49 @@
         }
 
         function autoSave() {
-            const currentList = collectCurrentData();
-            const cbObj = {
-                ten_cb: document.getElementById('cb_ten').value.trim(),
-                cap_bac: document.getElementById('cb_capbac').value.trim(),
-                chuc_vu: document.getElementById('cb_chucvu').value.trim(),
-                don_vi: document.getElementById('cb_donvi').value.trim()
-            };
-
-            localStorage.setItem('MOBILE_DATA_CB', JSON.stringify(cbObj));
-            localStorage.setItem('MOBILE_DATA_HS', JSON.stringify(currentList));
+            tinhThongKe();
+            updateStatus("🔄 ĐANG ĐẨY LÊN CLOUD...", "syncing");
             
-            localDataHoSo = currentList;
-            tinhThongKe(); // Tự tính toán lại bảng thống kê khi có thay đổi dữ liệu
-            updateJsonOutput();
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function() {
+                sendDataToCloud();
+            }, 1000);
         }
 
-        function updateJsonOutput() {
+        function sendDataToCloud() {
+            const currentList = collectCurrentData();
+            localDataHoSo = currentList;
+            
             const dataPackage = {
                 cb: {
-                    ten_cb: document.getElementById('cb_ten').value,
-                    cap_bac: document.getElementById('cb_capbac').value,
-                    chuc_vu: document.getElementById('cb_chucvu').value,
-                    don_vi: document.getElementById('cb_donvi').value
+                    ten_cb: document.getElementById('cb_ten').value.trim(),
+                    cap_bac: document.getElementById('cb_capbac').value.trim(),
+                    chuc_vu: document.getElementById('cb_chucvu').value.trim(),
+                    don_vi: document.getElementById('cb_donvi').value.trim()
                 },
-                hs: localDataHoSo
+                hs: currentList
             };
-            document.getElementById('txt_json_data').value = JSON.stringify(dataPackage);
+
+            if(GOOGLE_API_URL === "DÁN_LINK_APPS_SCRIPT_CỦA_BẠN_VÀO_ĐÂY") return;
+
+            fetch(GOOGLE_API_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(dataPackage)
+            })
+            .then(() => {
+                updateStatus("☁️ ĐÃ TỰ ĐỘNG ĐỒNG BỘ CLOUD", "online");
+            })
+            .catch(err => {
+                updateStatus("⚠️ ĐỒNG BỘ LỖI, ĐANG THỬ LẠI...", "syncing");
+            });
         }
 
-        /* LOGIC ĐIỀU KHIỂN CỬA SỔ MODAL CÀI ĐẶT */
-        function openModal() { document.getElementById('settingsModal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('settingsModal').style.display = 'none'; }
-
-        function copyJsonCode() {
-            const copyText = document.getElementById("txt_json_data");
-            copyText.select();
-            navigator.clipboard.writeText(copyText.value);
-            alert("📋 Đã copy mã dữ liệu thành công!");
-        }
-
-        function importJsonCode() {
-            const code = prompt("Dán đoạn mã sao lưu từ thiết bị khác vào đây:");
-            if (!code) return;
-            try {
-                const parsed = JSON.parse(code);
-                if(parsed.cb && parsed.hs) {
-                    document.getElementById('cb_ten').value = parsed.cb.ten_cb;
-                    document.getElementById('cb_capbac').value = parsed.cb.cap_bac;
-                    document.getElementById('cb_chucvu').value = parsed.cb.chuc_vu;
-                    document.getElementById('cb_donvi').value = parsed.cb.don_vi;
-                    localDataHoSo = parsed.hs;
-                    renderTable();
-                    autoSave();
-                    closeModal();
-                    alert("📥 Đồng bộ nạp dữ liệu hoàn tất!");
-                } else { alert("Mã dữ liệu sai cấu trúc!"); }
-            } catch(e) { alert("Mã không hợp lệ!"); }
+        function updateStatus(text, className) {
+            const statusBox = document.getElementById('sync_status');
+            statusBox.innerText = text;
+            statusBox.className = "status-badge " + className;
         }
 
         function showFormList(event, button, index) {
