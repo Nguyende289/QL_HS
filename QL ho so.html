@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Quản lý Hồ sơ CSBM</title>
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #007bff;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --bg-color: #f4f6f9;
+        }
+
+        body { font-family: Arial, sans-serif; margin: 10px; background-color: var(--bg-color); color: #333; font-size: 14px; }
+        h2 { text-align: center; color: var(--primary-color); text-transform: uppercase; margin: 10px 0; font-size: 18px; }
+        
+        /* Thanh công cụ đỉnh */
+        .toolbar-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .status-badge { background-color: var(--success-color); color: white; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .btn-settings { background: #6c757d; color: white; border: none; width: 32px; height: 32px; border-radius: 5px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+        .btn-settings:hover { background: #5a6268; }
+
+        /* Bảng thống kê số liệu */
+        .thong-ke-box { background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .thong-ke-box h4 { margin: 0 0 8px 0; color: var(--primary-color); font-size: 14px; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 4px;}
+        table.tbl-thong-ke { width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; }
+        table.tbl-thong-ke th { background: #e9ecef; color: #495057; padding: 6px; border: 1px solid #dee2e6; }
+        table.tbl-thong-ke td { padding: 6px; border: 1px solid #dee2e6; font-weight: bold; }
+        .txt-total { color: var(--danger-color); font-size: 13px; }
+
+        /* Khung thông tin cán bộ */
+        .cb-info-box { background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; border-left: 5px solid var(--secondary-color); }
+        .cb-info-box table { width: 100%; }
+        .cb-info-box td { padding: 4px; font-size: 13px; }
+        .cb-info-box input { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; box-sizing: border-box; }
+
+        /* Khung Thêm Mới Hồ Sơ */
+        .add-box { background: #e9ecef; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ced4da; }
+        .add-box h3 { margin: 0 0 10px 0; font-size: 14px; color: #495057; }
+        .add-flex { display: flex; flex-direction: column; gap: 8px; }
+        .add-flex input, .add-flex select { padding: 8px; border: 1px solid #ced4da; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        .btn-add { background-color: #17a2b8; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
+        .btn-add:hover { background-color: #138496; }
+
+        /* Danh sách dữ liệu chính */
+        .table-container { background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto; }
+        table.data-table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        table.data-table th, table.data-table td { border: 1px solid #dee2e6; padding: 8px; font-size: 13px; }
+        table.data-table th { background-color: var(--secondary-color); color: white; text-align: center; }
+        table.data-table tr:nth-child(even) { background-color: #f8f9fa; }
+        
+        td[contenteditable="true"] { background-color: #fffdf0; }
+        td[contenteditable="true"]:focus { background-color: #fff; border: 2px solid var(--success-color); outline: none; }
+
+        .btn-menu { background-color: var(--success-color); color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .btn-delete { background-color: var(--danger-color); color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 4px; }
+        
+        /* Cửa sổ cài đặt ẩn (Modal Pop-up) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .modal-content h3 { margin-top: 0; color: var(--primary-color); }
+        .modal-content textarea { width: 100%; height: 100px; box-sizing: border-box; margin-bottom: 10px; font-size: 11px; padding: 5px; }
+        .modal-actions { display: flex; justify-content: space-between; gap: 10px; }
+        .btn-io { background-color: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-close-modal { background-color: #343a40; color: white; }
+
+        @media (min-width: 600px) {
+            .add-flex { flex-direction: row; }
+            .btn-add { width: auto; }
+            .btn-delete { margin-top: 0; margin-left: 5px; }
+        }
+
+        .dropdown-menu-list { display: none; position: absolute; background-color: #ffffff; min-width: 180px; box-shadow: 0px 8px 16px rgba(0,0,0,0.2); border-radius: 4px; z-index: 1000; border: 1px solid #ccc; padding: 5px 0; }
+        .dropdown-menu-list a { color: #333; padding: 8px 12px; text-decoration: none; display: block; font-size: 13px; }
+        .dropdown-menu-list a:hover { background-color: var(--secondary-color); color: white; }
+    </style>
+</head>
+<body>
+
+    <h2>Hệ thống Quản lý Hồ sơ CSBM</h2>
+
+    <!-- THANH ĐỈNH ĐIỀU HƯỚNG CHỨA NÚT CÀI ĐẶT -->
+    <div class="toolbar-top">
+        <div class="status-badge">🔄 TỰ ĐỘNG LƯU ĐANG BẬT</div>
+        <!-- NÚT CÀI ĐẶT ẨN ĐỒNG BỘ -->
+        <button class="btn-settings" onclick="openModal()" title="Cài đặt đồng bộ thiết bị">⚙️</button>
+    </div>
+
+    <!-- BẢNG THỐNG KÊ HỒ SƠ QUẢN LÝ -->
+    <div class="thong-ke-box">
+        <h4>📊 Bảng thống kê dữ liệu nhanh</h4>
+        <table class="tbl-thong-ke">
+            <thead>
+                <tr>
+                    <th style="color: var(--danger-color);">TỔNG SỐ</th>
+                    <th>CSBM</th>
+                    <th>ĐT</th>
+                    <th>CTVDD</th>
+                    <th>chủ HTBM</th>
+                    <th>NAT</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="tk_tong" class="txt-total">0</td>
+                    <td id="tk_csbm">0</td>
+                    <td id="tk_dt">0</td>
+                    <td id="tk_ctvdd">0</td>
+                    <td id="tk_htbm">0</td>
+                    <td id="tk_nat">0</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- KHU VỰC CỬA SỔ PHỤ ĐỒNG BỘ (BỊ ẨN, CHỈ HIỆN KHI BẤM BÁNH RĂNG) -->
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>📲 Đồng bộ dữ liệu thiết bị</h3>
+            <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Sao chép chuỗi mã dưới đây gửi qua Zalo để chuyển dữ liệu sang thiết bị khác.</p>
+            <textarea id="txt_json_data" readonly onclick="this.select()"></textarea>
+            <div class="modal-actions">
+                <button class="btn-io" style="background-color: var(--secondary-color);" onclick="copyJsonCode()">📋 Copy Mã</button>
+                <button class="btn-io" style="background-color: #ffc107; color: #000;" onclick="importJsonCode()">📥 Nạp Mã Nhập</button>
+                <button class="btn-io btn-close-modal" onclick="closeModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- THÔNG TIN CÁN BỘ QUẢN LÝ -->
+    <div class="cb-info-box">
+        <table>
+            <tr>
+                <td width="20%"><strong>Tên CB:</strong></td>
+                <td><input type="text" id="cb_ten" oninput="autoSave()"></td>
+            </tr>
+            <tr>
+                <td><strong>Cấp bậc:</strong></td>
+                <td><input type="text" id="cb_capbac" oninput="autoSave()"></td>
+            </tr>
+            <tr>
+                <td><strong>Chức vụ:</strong></td>
+                <td><input type="text" id="cb_chucvu" oninput="autoSave()"></td>
+            </tr>
+            <tr>
+                <td><strong>Đơn vị:</strong></td>
+                <td><input type="text" id="cb_donvi" oninput="autoSave()"></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- KHUNG THÊM MỚI HỒ SƠ -->
+    <div class="add-box">
+        <h3>➕ Thêm hồ sơ mới</h3>
+        <div class="add-flex">
+            <input type="text" id="add_hoten" placeholder="Họ và tên">
+            <select id="add_loai">
+                <option value="CSBM">CSBM</option>
+                <option value="ĐT">ĐT</option>
+                <option value="CTVDD">CTVDD</option>
+                <option value="chủ HTBM">chủ HTBM</option>
+                <option value="NAT">NAT</option>
+            </select>
+            <input type="text" id="add_bidanh" placeholder="Bí danh">
+            <input type="text" id="add_sohs" placeholder="Số hồ sơ">
+            <button class="btn-add" onclick="addNewRow()">Thêm</button>
+        </div>
+    </div>
+
+    <!-- DANH SÁCH HỒ SƠ QUẢN LÝ -->
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th width="5%">STT</th>
+                    <th>Thông tin chi tiết hồ sơ (Họ tên / Loại / Bí danh / Số HS)</th>
+                    <th width="22%">Tác vụ</th>
+                </tr>
+            </thead>
+            <tbody id="danh_sach_ho_so" oninput="autoSave()"></tbody>
+        </table>
+    </div>
+
+    <!-- MENU BIỂU MẪU ĐỘNG -->
+    <div id="formDropdown" class="dropdown-menu-list">
+        <a href="#" onclick="openForm('mau_bl3.html')">📄 Mẫu BL3 (Báo cáo nhận xét)</a>
+    </div>
+
+    <script>
+        // DỮ LIỆU ĐỂ KHỞI TẠO NẾU CHƯA CÓ TRONG LƯU TRỮ
+        const DEFAULT_CAN_BO = { ten_cb: "Nguyễn Văn A", cap_bac: "Đại úy", chuc_vu: "Cán bộ địa bàn", don_vi: "Công an xã Kiều Phú" };
+        const DEFAULT_HO_SO = [
+            { ho_ten: "NGUYỄN VĂN BÌNH", loai_cs: "CSBM", bi_danh: "Thanh Sơn", so_ho_so: "HS-CSBM-2026/01" },
+            { ho_ten: "TRẦN THỊ MAI", loai_cs: "ĐT", bi_danh: "Hồng Hà", so_ho_so: "HS-DT-2026/02" }
+        ];
+
+        let selectedRowData = null;
+        let localDataHoSo = [];
+
+        window.onload = function() {
+            const savedCB = localStorage.getItem('MOBILE_DATA_CB');
+            const savedHS = localStorage.getItem('MOBILE_DATA_HS');
+
+            if (savedCB && savedHS) {
+                const cbObj = JSON.parse(savedCB);
+                document.getElementById('cb_ten').value = cbObj.ten_cb || '';
+                document.getElementById('cb_capbac').value = cbObj.cap_bac || '';
+                document.getElementById('cb_chucvu').value = cbObj.chuc_vu || '';
+                document.getElementById('cb_donvi').value = cbObj.don_vi || '';
+                localDataHoSo = JSON.parse(savedHS);
+            } else {
+                document.getElementById('cb_ten').value = DEFAULT_CAN_BO.ten_cb;
+                document.getElementById('cb_capbac').value = DEFAULT_CAN_BO.cap_bac;
+                document.getElementById('cb_chucvu').value = DEFAULT_CAN_BO.chuc_vu;
+                document.getElementById('cb_donvi').value = DEFAULT_CAN_BO.don_vi;
+                localDataHoSo = [...DEFAULT_HO_SO];
+            }
+            renderTable();
+            tinhThongKe();
+            updateJsonOutput();
+        };
+
+        function renderTable() {
+            const tbody = document.getElementById('danh_sach_ho_so');
+            tbody.innerHTML = "";
+            localDataHoSo.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td align="center" valign="middle">${index + 1}</td>
+                    <td>
+                        Họ Tên: <span contenteditable="true" class="edit-hoten" style="font-weight:bold;">${item.ho_ten || ''}</span><br>
+                        Loại: <span contenteditable="true" class="edit-loai" style="color:blue; font-weight:bold;">${item.loai_cs || ''}</span> | 
+                        Bí danh: <span contenteditable="true" class="edit-bidanh" style="font-style:italic;">${item.bi_danh || ''}</span><br>
+                        Số HS: <span contenteditable="true" class="edit-sohs">${item.so_ho_so || ''}</span>
+                    </td>
+                    <td align="center" valign="middle">
+                        <button class="btn-menu" onclick="showFormList(event, this, ${index})">MẪU ▾</button><br>
+                        <button class="btn-delete" onclick="deleteRow(${index})">Xóa</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // HÀM TÍNH TOÁN BẢNG THỐNG KÊ TỰ ĐỘNG
+        function tinhThongKe() {
+            let tong = localDataHoSo.length;
+            let csbm = 0, dt = 0, ctvdd = 0, htbm = 0, nat = 0;
+
+            localDataHoSo.forEach(item => {
+                let loai = (item.loai_cs || '').trim().toLowerCase();
+                if (loai === 'csbm') csbm++;
+                else if (loai === 'đt' || loai === 'dt') dt++;
+                else if (loai === 'ctvdd') ctvdd++;
+                else if (loai === 'chủ htbm' || loai === 'htbm') htbm++;
+                else if (loai === 'nat') nat++;
+            });
+
+            document.getElementById('tk_tong').innerText = tong;
+            document.getElementById('tk_csbm').innerText = csbm;
+            document.getElementById('tk_dt').innerText = dt;
+            document.getElementById('tk_ctvdd').innerText = ctvdd;
+            document.getElementById('tk_htbm').innerText = htbm;
+            document.getElementById('tk_nat').innerText = nat;
+        }
+
+        function addNewRow() {
+            const hoten = document.getElementById('add_hoten').value.trim();
+            const loai = document.getElementById('add_loai').value;
+            const bidanh = document.getElementById('add_bidanh').value.trim();
+            const sohs = document.getElementById('add_sohs').value.trim();
+
+            if (!hoten) { alert("Vui lòng nhập Họ và tên!"); return; }
+
+            localDataHoSo.push({ ho_ten: hoten, loai_cs: loai, bi_danh: bidanh, so_ho_so: sohs });
+            document.getElementById('add_hoten').value = "";
+            document.getElementById('add_bidanh').value = "";
+            document.getElementById('add_sohs').value = "";
+            
+            renderTable();
+            autoSave();
+        }
+
+        function deleteRow(index) {
+            if (confirm(`Xóa hồ sơ: ${localDataHoSo[index].ho_ten}?`)) {
+                localDataHoSo.splice(index, 1);
+                renderTable();
+                autoSave();
+            }
+        }
+
+        function collectCurrentData() {
+            const rows = document.querySelectorAll('#danh_sach_ho_so tr');
+            let updatedList = [];
+            rows.forEach(row => {
+                if(row.querySelector('.edit-hoten')){
+                    updatedList.push({
+                        ho_ten: row.querySelector('.edit-hoten').innerText.trim(),
+                        loai_cs: row.querySelector('.edit-loai').innerText.trim(),
+                        bi_danh: row.querySelector('.edit-bidanh').innerText.trim(),
+                        so_ho_so: row.querySelector('.edit-sohs').innerText.trim()
+                    });
+                }
+            });
+            return updatedList;
+        }
+
+        function autoSave() {
+            const currentList = collectCurrentData();
+            const cbObj = {
+                ten_cb: document.getElementById('cb_ten').value.trim(),
+                cap_bac: document.getElementById('cb_capbac').value.trim(),
+                chuc_vu: document.getElementById('cb_chucvu').value.trim(),
+                don_vi: document.getElementById('cb_donvi').value.trim()
+            };
+
+            localStorage.setItem('MOBILE_DATA_CB', JSON.stringify(cbObj));
+            localStorage.setItem('MOBILE_DATA_HS', JSON.stringify(currentList));
+            
+            localDataHoSo = currentList;
+            tinhThongKe(); // Tự tính toán lại bảng thống kê khi có thay đổi dữ liệu
+            updateJsonOutput();
+        }
+
+        function updateJsonOutput() {
+            const dataPackage = {
+                cb: {
+                    ten_cb: document.getElementById('cb_ten').value,
+                    cap_bac: document.getElementById('cb_capbac').value,
+                    chuc_vu: document.getElementById('cb_chucvu').value,
+                    don_vi: document.getElementById('cb_donvi').value
+                },
+                hs: localDataHoSo
+            };
+            document.getElementById('txt_json_data').value = JSON.stringify(dataPackage);
+        }
+
+        /* LOGIC ĐIỀU KHIỂN CỬA SỔ MODAL CÀI ĐẶT */
+        function openModal() { document.getElementById('settingsModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('settingsModal').style.display = 'none'; }
+
+        function copyJsonCode() {
+            const copyText = document.getElementById("txt_json_data");
+            copyText.select();
+            navigator.clipboard.writeText(copyText.value);
+            alert("📋 Đã copy mã dữ liệu thành công!");
+        }
+
+        function importJsonCode() {
+            const code = prompt("Dán đoạn mã sao lưu từ thiết bị khác vào đây:");
+            if (!code) return;
+            try {
+                const parsed = JSON.parse(code);
+                if(parsed.cb && parsed.hs) {
+                    document.getElementById('cb_ten').value = parsed.cb.ten_cb;
+                    document.getElementById('cb_capbac').value = parsed.cb.cap_bac;
+                    document.getElementById('cb_chucvu').value = parsed.cb.chuc_vu;
+                    document.getElementById('cb_donvi').value = parsed.cb.don_vi;
+                    localDataHoSo = parsed.hs;
+                    renderTable();
+                    autoSave();
+                    closeModal();
+                    alert("📥 Đồng bộ nạp dữ liệu hoàn tất!");
+                } else { alert("Mã dữ liệu sai cấu trúc!"); }
+            } catch(e) { alert("Mã không hợp lệ!"); }
+        }
+
+        function showFormList(event, button, index) {
+            event.stopPropagation();
+            selectedRowData = localDataHoSo[index];
+            const dropdown = document.getElementById('formDropdown');
+            const rect = button.getBoundingClientRect();
+            dropdown.style.top = (window.scrollY + rect.bottom) + 'px';
+            dropdown.style.left = (window.scrollX + rect.left) + 'px';
+            dropdown.style.display = 'block';
+        }
+
+        function openForm(fileName) {
+            if (!selectedRowData) return;
+            const url = `${fileName}?hoten=${encodeURIComponent(selectedRowData.ho_ten)}&loai=${encodeURIComponent(selectedRowData.loai_cs)}&bidanh=${encodeURIComponent(selectedRowData.bi_danh)}&sohs=${encodeURIComponent(selectedRowData.so_ho_so)}&cbten=${encodeURIComponent(document.getElementById('cb_ten').value)}&cbcapbac=${encodeURIComponent(document.getElementById('cb_capbac').value)}&cbchucvu=${encodeURIComponent(document.getElementById('cb_chucvu').value)}&cbdonvi=${encodeURIComponent(document.getElementById('cb_donvi').value)}`;
+            window.open(url, '_blank');
+        }
+
+        document.addEventListener('click', function() {
+            document.getElementById('formDropdown').style.display = 'none';
+        });
+    </script>
+</body>
+</html>

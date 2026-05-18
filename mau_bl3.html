@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Mẫu BL3 - Báo cáo Nhận xét</title>
+    <style>
+        body { font-family: "Times New Roman", Times, serif; margin: 40px auto; width: 750px; line-height: 1.6; font-size: 14pt; background-color: #fff; color: #000; }
+        
+        /* Tiêu ngữ & Đơn vị */
+        .header-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .header-table td { vertical-align: top; text-align: center; font-size: 13pt; }
+        
+        /* Tiêu đề văn bản */
+        .title { text-align: center; font-weight: bold; margin-bottom: 30px; text-transform: uppercase; font-size: 15pt; }
+        
+        /* Phần thân văn bản */
+        .content { text-align: justify; margin-bottom: 20px; }
+        
+        /* Các ô nhập liệu hoặc hiển thị dữ liệu */
+        .dynamic-data { font-weight: bold; color: #000; display: inline-block; }
+        span[contenteditable="true"] { border-bottom: 1px dashed #666; padding: 0 5px; background-color: #fcfcfc; }
+        span[contenteditable="true"]:focus { background-color: #fff; border-bottom: 1px solid #000; outline: none; }
+        
+        /* Định dạng các Dropdown chọn nhanh */
+        select { font-family: "Times New Roman", serif; font-size: 14pt; border: 1px solid #ccc; padding: 2px; border-radius: 4px; font-weight: bold; }
+        
+        /* Phần ký tên */
+        .footer-table { width: 100%; border-collapse: collapse; margin-top: 40px; }
+        .footer-table td { text-align: center; vertical-align: top; width: 50%; }
+
+        /* Nút in ấn ẩn đi khi in thực tế */
+        .no-print-zone { background: #f1f1f1; padding: 10px; margin-bottom: 20px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ccc; }
+        .btn-print { background-color: #007bff; color: white; border: none; padding: 8px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        @media print {
+            .no-print-zone { display: none; }
+            body { margin: 20px; width: 100%; }
+            span[contenteditable="true"] { border-bottom: none; background: transparent; }
+        }
+    </style>
+</head>
+<!-- TỰ ĐỘNG CHẠY HÀM ĐÓN DỮ LIỆU KHI TẢI TRANG -->
+<body onload="load_page()">
+
+    <!-- THANH CÔNG CỤ (ẨN KHI IN) -->
+    <div class="no-print-zone">
+        <span style="font-size: 11pt; color: #555; font-style: italic;">* Biểu mẫu đã tự động điền dữ liệu. Bạn có thể nhấp chuột vào các chỗ gạch chân để gõ thêm nội dung nếu cần.</span>
+        <button class="btn-print" onclick="window.print()">🖨️ IN BIỂU MẪU (FILE PDF)</button>
+    </div>
+
+    <!-- CƠ CẤU TIÊU NGỮ HÀNH CHÍNH -->
+    <table class="header-table">
+        <tr>
+            <td width="45%">
+                <span id="hien_thi_don_vi" style="text-transform: uppercase;">CÔNG AN KÌU PHÚ</span><br>
+                <strong>ĐỊA BÀN: <span id="hien_thi_chuc_vu" contenteditable="true">XÃ KIỀU PHÚ</span></strong>
+            </td>
+            <td width="55%">
+                <strong>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</strong><br>
+                <span style="text-decoration: underline;">Độc lập - Tự do - Hạnh phúc</span><br>
+                <span style="font-style: italic; font-size: 12pt;">Kiều Phú, ngày..... tháng..... năm 2026</span>
+            </td>
+        </tr>
+    </table>
+
+    <!-- TIÊU ĐỀ CHÍNH -->
+    <div class="title">
+        BÁO CÁO NHẬN XÉT, ĐÁNH GIÁ TÌNH HÌNH<br>
+        VÀ KẾT QUẢ HOẠT ĐỘNG CỦA LỰC LƯỢNG MẬT
+    </div>
+
+    <!-- NỘI DUNG VĂN BẢN -->
+    <div class="content">
+        Kính gửi: Lãnh đạo Công an huyện Quốc Oai.<br><br>
+        
+        Thực hiện kế hoạch công tác tuần/tháng, Cán bộ địa bàn tiến hành kiểm tra, đánh giá và nhận xét tình hình hoạt động của đối tượng quản lý nghiệp vụ với các nội dung cụ thể sau:<br><br>
+        
+        1. Họ và tên người được nhận xét: <span id="HT" class="dynamic-data" style="font-size: 15pt;">[Chưa có dữ liệu]</span> 
+        <span id="lbl311" style="color:red; font-size:11pt;">(Chưa nhận được tên từ bảng)</span><br>
+        
+        2. Phân loại lực lượng mật: 
+        <!-- Giữ nguyên ID để tương thích logic phân loại của bạn -->
+        <span id="nhap_ll" style="display:none;"></span>
+        <span id="nhap_ll_khac" style="display:none;"></span>
+        <span id="LL">
+            <select id="luc_luong">
+                <option value="CSBM">CSBM</option>
+                <option value="ĐT">ĐT</option>
+                <option value="CTVDD">CTVDD</option>
+                <option value="chủ HTBM">chủ HTBM</option>
+                <option value="NAT">NAT</option>
+            </select>
+        </span><br>
+
+        3. Bí danh sử dụng trong hoạt động: <span contenteditable="true" class="dynamic-data" style="min-width: 150px;">[Bí danh]</span><br>
+        
+        4. Hồ sơ lưu trữ số: <span contenteditable="true" class="dynamic-data" style="min-width: 150px;">[Số hồ sơ]</span><br><br>
+        
+        <strong>I. ĐÁNH GIÁ KẾT QUẢ ĐẠT ĐƯỢC:</strong><br>
+        Trong thời gian qua, đối tượng đã cung cấp nhiều nguồn tin có giá trị liên quan đến an ninh trật tự trên địa bàn phụ trách. Ý thức chấp hành pháp luật và quy định nghiệp vụ thực hiện nghiêm túc, giữ vững nguyên tắc bí mật.<br>
+        - Nội dung bổ sung cụ thể: <span contenteditable="true" style="display: inline-block; width: 80%;">.........................................................................................................................................................</span><br><br>
+        
+        <strong>II. PHÂN LOẠI CHẤT LƯỢNG HOẠT ĐỘNG:</strong><br>
+        Căn cứ vào hiệu quả tinh thông và số lượng tin tức thu thập được, phân loại mức độ hoàn thành nhiệm vụ kỳ này đạt mức: 
+        <span id="nhap_pl" style="display:none;">Khá</span> <!-- Dòng text ẩn để nhận diện logic cũ nếu cần -->
+        <select id="phan_loai">
+            <option value="0">Xuất sắc</option>
+            <option value="1">Khá</option>
+            <option value="2">Trung bình</option>
+            <option value="3">Kém</option>
+        </select>
+    </div>
+
+    <!-- KHU VỰC KÝ TÊN -->
+    <table class="footer-table">
+        <tr>
+            <td>
+                <strong>Ý KIẾN BAN CHỈ HUY CA XÃ</strong><br>
+                <span style="font-size: 11pt; font-style: italic;">(Ký, ghi rõ họ tên)</span>
+                <br><br><br><br><br>
+                <strong style="text-transform: uppercase;">......................................</strong>
+            </td>
+            <td>
+                <strong>CÁN BỘ BÁO CÁO</strong><br>
+                <span style="font-size: 11pt; font-style: italic;">(Ký, ghi rõ họ tên)</span>
+                <br><br><br><br>
+                <span id="ky_ten_cap_bac" style="font-style: italic; font-size: 13pt;">[Cấp bậc]</span><br>
+                <strong id="ky_ten_can_bo" style="text-transform: uppercase; font-size: 14pt;">[Tên cán bộ]</strong>
+            </td>
+        </tr>
+    </table>
+
+    <!-- SCRIPT TỰ ĐỘNG BÓC DỮ LIỆU TỪ URL SANG BIỂU MẪU -->
+    <script>
+        function load_page() {
+            // 1. Tự động bóc tách dữ liệu truyền từ thanh địa chỉ link (URL) sang
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Đổ họ tên vào ô ID "HT"
+            if (urlParams.has('hoten')) {
+                document.getElementById('HT').innerHTML = urlParams.get('hoten');
+                if (document.getElementById('lbl311')) document.getElementById('lbl311').style.display = 'none';
+            }
+            
+            // Tự động tìm và chọn đúng Loại lực lượng mật trên Dropdown
+            if (urlParams.has('loai')) {
+                const loai_cs = urlParams.get('loai');
+                const ddl_ll = document.getElementById('luc_luong');
+                for (let i = 0; i < ddl_ll.options.length; i++) {
+                    if (ddl_ll.options[i].text.toLowerCase() === loai_cs.toLowerCase() || ddl_ll.options[i].value.toLowerCase() === loai_cs.toLowerCase()) {
+                        ddl_ll.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            // Tự động tìm ô điền Bí danh và Số hồ sơ dựa trên các thẻ có thuộc tính sửa đổi contenteditable
+            const contentSpans = document.querySelectorAll('.content span[contenteditable], .content [contenteditable="true"]');
+            if (contentSpans.length >= 2) {
+                if (urlParams.has('bidanh')) contentSpans[0].innerHTML = urlParams.get('bidanh');
+                if (urlParams.has('sohs')) contentSpans[1].innerHTML = urlParams.get('sohs');
+            }
+
+            // Tự động đổ dữ liệu thông tin Cán bộ quản lý vào phần tiêu đề và chữ ký
+            if (urlParams.has('cbten')) document.getElementById('ky_ten_can_bo').innerHTML = urlParams.get('cbten');
+            if (urlParams.has('cbcapbac')) document.getElementById('ky_ten_cap_bac').innerHTML = urlParams.get('cbcapbac') + ".";
+            if (urlParams.has('cbdonvi')) document.getElementById('hien_thi_don_vi').innerHTML = urlParams.get('cbdonvi');
+            if (urlParams.has('cbchucvu')) document.getElementById('hien_thi_chuc_vu').innerHTML = urlParams.get('cbchucvu');
+
+            // 2. Logic xử lý trạng thái phân loại mặc định ban đầu
+            const span_pl = document.getElementById('nhap_pl').innerHTML.trim();
+            const DDL_PL = document.getElementById('phan_loai');
+            switch (span_pl) {
+                case 'Xuất sắc': DDL_PL.value = "0"; break;
+                case 'Khá': DDL_PL.value = "1"; break;
+                case 'Trung bình': DDL_PL.value = "2"; break;
+                case 'Kém': DDL_PL.value = "3"; break;
+            }
+        }
+    </script>
+</body>
+</html>
