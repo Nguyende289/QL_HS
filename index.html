@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Quản lý Hồ sơ Giao diện Bảng</title>
+    <title>Hệ thống Quản lý Hồ sơ - Nâng cấp Bảo mật</title>
     <style>
         :root {
             --primary-color: #1a365d;
@@ -11,16 +11,22 @@
             --success-color: #28a745;
             --danger-color: #dc3545;
             --bg-color: #f4f6f9;
+            --dark-blue: #0f172a;
         }
 
         body { font-family: Arial, sans-serif; margin: 10px; background-color: var(--bg-color); color: #333; font-size: 14px; }
-        h2 { text-align: center; color: var(--primary-color); text-transform: uppercase; margin: 10px 0; font-size: 18px; }
         
+        /* THANH TIÊU ĐỀ & NÚT CÀI ĐẶT */
+        .header-bar { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .header-bar h2 { margin: 0; color: var(--primary-color); text-transform: uppercase; font-size: 16px; flex-grow: 1; text-align: center; margin-left: 40px; }
+        .btn-settings-toggle { background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+        .btn-settings-toggle:hover { background: #495057; }
+
         /* MÀN HÌNH KHÓA MÃ PIN */
         #pin-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111a24; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
         .pin-box { background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; max-width: 320px; width: 85%; }
         .pin-box h3 { margin-top: 0; color: #38bdf8; letter-spacing: 1px; font-size: 16px; text-transform: uppercase;}
-        .pin-input { width: 100%; padding: 12px; font-size: 22px; text-align: center; border: 2px solid #475569; background: #0f172a; color: #fff; border-radius: 6px; letter-spacing: 5px; box-sizing: border-box; margin-bottom: 15px; }
+        .pin-input { width: 100%; padding: 12px; font-size: 22px; text-align: center; border: 2px solid #475569; background: #dark-blue; color: #fff; border-radius: 6px; letter-spacing: 5px; box-sizing: border-box; margin-bottom: 15px; }
         .pin-input:focus { border-color: var(--secondary-color); outline: none; }
         .btn-unlock { background: var(--secondary-color); color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; }
         .btn-unlock:hover { background: #0056b3; }
@@ -29,12 +35,19 @@
         /* Giao diện chính */
         #main-content { display: none; }
 
-        /* Khung nhập xuất bộ nhớ dữ liệu */
-        .io-container { background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #bdd7ee; }
-        .io-title { font-weight: bold; margin-bottom: 8px; color: #2e75b6; display: flex; justify-content: space-between; align-items: center;}
-        .io-input { width: 100%; padding: 8px; font-size: 12px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; margin-bottom: 8px; background: #fafafa;}
-        .btn-group-io { display: flex; gap: 8px; }
-        .btn-io { flex: 1; padding: 10px; font-weight: bold; font-size: 13px; border: none; border-radius: 4px; cursor: pointer; color: white;}
+        /* KHUNG CÀI ĐẶT / ĐỒNG BỘ ẨN HIỆN */
+        .settings-panel { display: none; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 15px; border: 2px solid #6c757d; }
+        .settings-title { font-weight: bold; margin-bottom: 12px; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 5px; font-size: 14px; text-transform: uppercase; }
+        
+        .sync-section { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px; }
+        @media (min-width: 768px) { .sync-section { grid-template-columns: 1fr 1fr; } }
+        
+        .sync-card { background: #f8f9fa; border: 1px solid #ced4da; padding: 12px; border-radius: 6px; }
+        .sync-card h5 { margin: 0 0 8px 0; color: var(--primary-color); font-size: 13px; }
+        
+        .io-input { width: 100%; padding: 8px; font-size: 12px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; margin-bottom: 8px; background: #fff;}
+        .btn-group-custom { display: flex; gap: 6px; flex-wrap: wrap; }
+        .btn-custom { flex: 1; min-width: 120px; padding: 8px 10px; font-weight: bold; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; color: white; text-align: center; }
 
         /* Bảng thống kê */
         .thong-ke-box { background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; }
@@ -64,11 +77,8 @@
         table.data-table th { background-color: var(--secondary-color); color: white; font-weight: bold; }
         table.data-table tr:nth-child(even) { background-color: #f8f9fa; }
         
-        /* Cấu hình các ô cho phép sửa trực tiếp */
         td[contenteditable="true"] { background-color: #fffdf0; text-align: left; padding-left: 8px; }
         td[contenteditable="true"]:focus { background-color: #fff; border: 2px solid var(--success-color); outline: none; box-shadow: inset 0 1px 1px rgba(0,0,0,.075); }
-        
-        /* Cột Loại căn giữa để đẹp mắt */
         td.col-loai { font-weight: bold; color: blue; text-align: center; }
 
         .btn-action-container { display: flex; gap: 4px; justify-content: center; align-items: center; }
@@ -100,19 +110,42 @@
 
     <!-- TOÀN BỘ NỘI DUNG CHÍNH -->
     <div id="main-content">
-        <h2>Hệ thống Quản lý Hồ sơ CSBM</h2>
+        
+        <!-- THANH TIÊU ĐỀ & NÚT CÀI ĐẶT -->
+        <div class="header-bar">
+            <h2>Hệ thống Quản lý Hồ sơ CSBM</h2>
+            <button class="btn-settings-toggle" onclick="toggleSettingsPanel()">⚙️ CÀI ĐẶT</button>
+        </div>
 
-        <!-- KHUNG CHỨA BỘ NHỚ COPY / DÁN DỮ LIỆU THỦ CÔNG -->
-        <div class="io-container">
-            <div class="io-title">
-                <span>📦 BỘ NHỚ ĐỒNG BỘ THỦ CÔNG</span>
-                <span id="copy_status" style="color:var(--success-color); font-size:12px; font-weight:normal;"></span>
+        <!-- KHUNG BẢNG ĐIỀU KHIỂN CÀI ĐẶT / ĐỒNG BỘ ĐÃ ĐƯỢC GÔM LẠI -->
+        <div id="settings_panel" class="settings-panel">
+            <div class="settings-title">⚙️ Trung tâm cấu hình và Đồng bộ dữ liệu</div>
+            
+            <div class="sync-section">
+                <!-- HÀNG 1: ĐỒNG BỘ FILE -->
+                <div class="sync-card">
+                    <h5>📁 CÁCH 1: ĐỒNG BỘ BẰNG FILE CHUYÊN DỤNG (KHUYÊN DÙNG)</h5>
+                    <p style="font-size:12px; color:#666; margin:0 0 8px 0;">Xuất toàn bộ dữ liệu ra file lưu trên máy hoặc nạp file cũ lên web.</p>
+                    <div class="btn-group-custom">
+                        <button class="btn-custom" style="background:#28a745;" onclick="exportToJSONFile()">📤 XUẤT FILE (.json)</button>
+                        <button class="btn-custom" style="background:#007bff;" onclick="triggerFileInput()">📥 NẠP FILE (.json)</button>
+                    </div>
+                    <input type="file" id="file_picker" accept=".json" style="display:none;" onchange="importFromJSONFile(event)">
+                </div>
+
+                <!-- HÀNG 2: ĐỒNG BỘ CHUỖI TEXT COPPY -->
+                <div class="sync-card">
+                    <h5>📋 CÁCH 2: ĐỒNG BỘ THỦ CÔNG BẰNG CHUỖI MÃ TEXT</h5>
+                    <span id="copy_status" style="color:var(--success-color); font-size:11px; font-weight:bold; display:block; margin-bottom:4px;"></span>
+                    <input type="text" id="data_string_box" class="io-input" placeholder="Dán mã text sao lưu vào đây...">
+                    <div class="btn-group-custom">
+                        <button class="btn-custom" style="background:#007bff;" onclick="importDataFromString()">🔄 TẢI MÃ LÊN WEB</button>
+                        <button class="btn-custom" style="background:#28a745;" onclick="copyDataString()">📋 COPY MÃ TEXT</button>
+                    </div>
+                </div>
             </div>
-            <input type="text" id="data_string_box" class="io-input" placeholder="Dán chuỗi dữ liệu cũ vào đây rồi bấm 'TẢI DỮ LIỆU'...">
-            <div class="btn-group-io">
-                <button class="btn-io" style="background:#007bff;" onclick="importDataFromString()">🔄 TẢI DỮ LIỆU LÊN WEB</button>
-                <button class="btn-io" style="background:#28a745;" onclick="copyDataString()">📋 COPY MÃ MỚI</button>
-            </div>
+            
+            <button class="btn-custom" style="background:#6c757d; width:100%;" onclick="toggleSettingsPanel()">ĐÓNG BẢNG CÀI ĐẶT</button>
         </div>
 
         <!-- BẢNG THỐNG KÊ DỮ LIỆU NHANH -->
@@ -182,7 +215,7 @@
             </div>
         </div>
 
-        <!-- DANH SÁCH HỒ SƠ QUẢN LÝ DẠNG BẢNG CHIA CỘT RÕ RÀNG -->
+        <!-- DANH SÁCH HỒ SƠ QUẢN LÝ DẠNG BẢNG -->
         <div class="table-container">
             <table class="data-table">
                 <thead>
@@ -206,9 +239,7 @@
     </div>
 
     <script>
-        // MÃ PIN TRUY CẬP TRÊN WEB
         const MY_PIN_CODE = "1234";
-
         let selectedRowData = null;
         let localDataHoSo = [];
 
@@ -240,12 +271,22 @@
             }
         }
 
-        function updateDataStringOnly() {
+        // ẨN HIỆN KHUNG CÀI ĐẶT
+        function toggleSettingsPanel() {
+            const panel = document.getElementById('settings_panel');
+            if(panel.style.display === 'block') {
+                panel.style.display = 'none';
+            } else {
+                panel.style.display = 'block';
+            }
+        }
+
+        function packCurrentData() {
             const currentList = collectCurrentData();
             localDataHoSo = currentList;
             tinhThongKe();
 
-            const dataPackage = {
+            return {
                 cb: {
                     ten_cb: document.getElementById('cb_ten').value.trim(),
                     cap_bac: document.getElementById('cb_capbac').value.trim(),
@@ -254,15 +295,67 @@
                 },
                 hs: currentList
             };
+        }
 
+        function updateDataStringOnly() {
+            const dataPackage = packCurrentData();
             const jsonString = JSON.stringify(dataPackage);
             const base64String = btoa(unescape(encodeURIComponent(jsonString)));
             
             document.getElementById('data_string_box').value = base64String;
             localStorage.setItem('local_backup_data', base64String);
-            showStatusMessage("🔄 Đã tạo mã lưu trữ mới");
+            showStatusMessage("🔄 Đã tự động sao lưu dữ liệu mới");
         }
 
+        /* TÍNH NĂNG ĐỒNG BỘ 1: XUẤT - NẠP FILE JSON */
+        function exportToJSONFile() {
+            const dataPackage = packCurrentData();
+            const jsonString = JSON.stringify(dataPackage, null, 2);
+            const blob = new Blob([jsonString], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `backup_data_hoso_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert("Đã xuất file lưu trữ thành công!");
+        }
+
+        function triggerFileInput() {
+            document.getElementById('file_picker').click();
+        }
+
+        function importFromJSONFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if(data.cb && data.hs) {
+                        applyDataToUI(data);
+                        // Cập nhật lại khay nhớ tạm chuỗi text cho đồng bộ
+                        const base64String = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+                        document.getElementById('data_string_box').value = base64String;
+                        localStorage.setItem('local_backup_data', base64String);
+                        
+                        alert("✅ Đã nạp dữ liệu từ file thành công!");
+                    } else {
+                        alert("Cấu trúc file dữ liệu không đúng!");
+                    }
+                } catch (err) {
+                    alert("Lỗi đọc file, file có thể bị hỏng!");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ""; // reset file picker
+        }
+
+        /* TÍNH NĂNG ĐỒNG BỘ 2: CHUỖI TEXT */
         function importDataFromString() {
             const str = document.getElementById('data_string_box').value.trim();
             if(!str) return;
@@ -270,41 +363,43 @@
             try {
                 const jsonString = decodeURIComponent(escape(atob(str)));
                 const data = JSON.parse(jsonString);
-
                 if(data.cb && data.hs) {
-                    document.getElementById('cb_ten').value = data.cb.ten_cb || '';
-                    document.getElementById('cb_capbac').value = data.cb.cap_bac || '';
-                    document.getElementById('cb_chucvu').value = data.cb.chuc_vu || '';
-                    document.getElementById('cb_donvi').value = data.cb.don_vi || '';
-                    localDataHoSo = data.hs;
-                    renderTable();
-                    tinhThongKe();
+                    applyDataToUI(data);
                     localStorage.setItem('local_backup_data', str);
                     showStatusMessage("✅ Tải dữ liệu thành công!");
                 }
             } catch (e) {
-                alert("Mã dữ liệu không hợp lệ hoặc bị thiếu ký tự!");
+                alert("Mã text không hợp lệ!");
             }
+        }
+
+        function applyDataToUI(data) {
+            document.getElementById('cb_ten').value = data.cb.ten_cb || '';
+            document.getElementById('cb_capbac').value = data.cb.cap_bac || '';
+            document.getElementById('cb_chucvu').value = data.cb.chuc_vu || '';
+            document.getElementById('cb_donvi').value = data.cb.don_vi || '';
+            localDataHoSo = data.hs;
+            renderTable();
+            tinhThongKe();
         }
 
         function copyDataString() {
             updateDataStringOnly();
             const copyText = document.getElementById("data_string_box");
-            if(!copyText.value) { alert("Không có dữ liệu để copy!"); return;}
+            if(!copyText.value) { alert("Không có dữ liệu!"); return;}
             
             copyText.select();
             copyText.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(copyText.value);
             
-            showStatusMessage("📋 ĐÃ COPY MÃ VÀO KHAY NHỚ TẠM!");
-            alert("Đã copy mã thành công! Hãy dán mã này vào Google Sheets hoặc tin nhắn Zalo để cất giữ.");
+            showStatusMessage("📋 ĐÃ COPY MÃ CHUỖI!");
+            alert("Đã copy chuỗi mã thành công!");
         }
 
         function showStatusMessage(text) {
             document.getElementById('copy_status').innerText = text;
         }
 
-        // HÀM ĐỔ DỮ LIỆU THEO TỪNG CỘT RIÊNG BIỆT
         function renderTable() {
             const tbody = document.getElementById('danh_sach_ho_so');
             tbody.innerHTML = "";
